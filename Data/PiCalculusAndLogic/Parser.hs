@@ -25,7 +25,7 @@ send :: Parser Term
 send = do
   ma <- optionMaybe channel
   char '<'
-  mb <- optionMaybe pattern
+  mb <- optionMaybe $ (do a <- term; return $ Left a) <|> (do a <- pattern; return $ Right a)
   char '>'
   case (ma,mb) of
     (Nothing,Nothing)         -> parserZero
