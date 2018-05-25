@@ -1,11 +1,13 @@
-module Data.PiCalculysAndLogic.Expr where
+module Data.PiCalculusAndLogic.Expr where
 
 data Expr = Empt | Fail
           | Inhe | Star | Mark
+          | Toke
+          | Bind
           | Text  String
           | Abbr [String]
           | Chan [String]
-          | Blck [String] (Either String Expr)
+          | Blck [String] (Either [String] Expr)
           | Send { chanToPipe :: Expr, nameToSend :: Expr }
           | Wait { chanToWait :: Expr, nameToBind :: Expr }
           | OptW { chanToWait :: Expr }
