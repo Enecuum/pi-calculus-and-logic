@@ -103,7 +103,7 @@ blck = do
   sps
   char '{'
   sps
-  b <- exprC
+  b <- exprD
   sps
   char '}'
   sps
@@ -112,11 +112,31 @@ blck = do
   f Nothing  = []
   f (Just a) = a
 
-exprA = try blck <|> try send <|> wait
+servA :: Parser Expr
+servA = do
+  sps
+  char '!'
+  sps
+  a <- exprA
+  sps
+  return $ Serv a
+
+servB :: Parser Expr
+servB = do
+  sps
+  char '!'
+  sps
+  a <- exprC
+  sps
+  return $ Serv a
+
+exprA = servA <|> try blck <|> try send <|> wait
 
 exprB = try ordr <|> exprA
 
 exprC = try comm <|> exprB
+
+exprD = try servB <|> exprC
 
 
 ordr :: Parser Expr
@@ -174,9 +194,6 @@ wait = do
 
 comm :: Parser Term
 comm = undefined
-
-serv :: Parser Term
-serv = undefined
 
 optw :: Parser Term
 optw = undefined
