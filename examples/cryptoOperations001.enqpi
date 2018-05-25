@@ -1,0 +1,41 @@
+
+
+  main()
+
+. { ! merkleTree:hashOp:server((a).(b).ret)
+    . isHash256Bit<a|b>
+    . concatBytes(<a>.<b>.c)
+    . hash:sha256(<c>.(ret<*>)) }
+
+. merkleTree:hashOp:server
+    <b58:7542fb6685f9fd8f37d56faf62f0bb4563684a51539e4b26f0840db361e0027c>
+    <b58:7542fb6685f9fd8f37d56faf62f0bb4563684a51539e4b26f0840db361e0027c>
+    (hash123)
+
+. print<hash123>
+
+. { ! enecuum:pvcnHashLoop:server((blockOfBytes).(hashToMix<*>).return)
+    . keccak1600(<blockOfBytes>.(kstate))
+    . } ! cryptoTools:mix1600with256:inPlace(<hashToMix>.<kstate>)
+        . cryptonight:aes:expandToL2(<kstate>.(l2state))
+        . crypronight:aes:mixState:inPlace(<l2state>)
+        . cryptoTools:x15:hash(<l2state>.hash)
+        . { hashToMix<hash> | return<hash> }
+      }
+  }
+
+. !currentComplexity<enecuum:defaultComplexity>
+
+. { enecuum:pcvnHashLoop:server(<b58:7542fb668>.<b58:d56faf62f0bb>.result)
+  . { ! работаСделана(?)
+      . result(hash) . print(<"промежуточный хэш: ">.<hash>)
+      . { ? isHashSolved(<currentComplexity>.<hash>)
+          . print(<"хэш найден: ">.<hash>)
+          . !работаСделана<>
+        }
+    }
+  }
+
+
+
+
