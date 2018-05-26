@@ -103,7 +103,7 @@ blck = do
   sps
   char '{'
   sps
-  b <- exprD
+  b <- exprE
   sps
   char '}'
   sps
@@ -111,6 +111,15 @@ blck = do
  where
   f Nothing  = []
   f (Just a) = a
+
+optf :: Parser Expr
+optf = do
+  sps
+  char '?'
+  sps
+  a <- exprD
+  sps
+  return $ OptF a
 
 servA :: Parser Expr
 servA = do
@@ -137,6 +146,8 @@ exprB = try ordr <|> exprA
 exprC = try comm <|> exprB
 
 exprD = try servB <|> exprC
+
+exprE = try optf <|> exprD
 
 
 ordr :: Parser Expr
@@ -197,9 +208,6 @@ comm = undefined
 
 optw :: Parser Term
 optw = undefined
-
-optf :: Parser Term
-optf = undefined
 
 empt :: Parser Term
 empt = undefined
