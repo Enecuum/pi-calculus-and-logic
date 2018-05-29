@@ -7,55 +7,35 @@ import Data.SymbolForChan
 data Term = Empt | Fail
 
 
-          | Ques { quesToPipe :: Chan, bindToSend :: Chan }  -- a < b >
-          | Wait { chanToWait :: Chan, nameToBind :: Chan }  -- a ( b )   bindToRightSide
+          | FPUB { questToCommPipe    :: Chan, useBindFromPast     :: Chan }    -- use bind from past     quest < bfp >
+          | BTRS { listenFromCommPipe :: Chan, newBindToRightSide  :: Chan }    -- bind to right side     listen ( newBindTRS )
 
+          | UBFF { useBindFromFuture  :: Chan, chooseAlterFromPipe :: Chan }    -- use bind from future   ( bff ) choose
+          | LSBT { newBindToLeftSide  :: Chan, offerAlterToPipe    :: Chan }    -- bind to left side      < newBindTLS > offer
 
-          | Send { nextToBind :: Chan, alterToSend :: Chan } -- ( a ) [ b ]
-          | Recv { bindToWait :: Chan, nameToAlter :: Chan } -- < a > [ b ]  bindToLeftSide
+          -- Operators for channels
+          | COMM [Term] -- listen quests, choose offers
+          | ORDR [Term] -- create binds use binds, check order
 
+          -- Operators for exponentials
+          | SERV  Term  -- term can be removed or duplicated
+          | LOG2  Term  -- not remove term only if place with it reduced 2^n times
 
--- FPUB
--- UBFF
--- BTRS
--- LSBT
+          -- Operators for logic
 
-          | FPUB { questToCommPipe    :: Chan, useBindFromPast     :: Chan } -- use bind from past     quest < bfp >
-          | BTRS { listenFromCommPipe :: Chan, newBindToRightSide  :: Chan } -- bind to right side     listen ( newBindTRS )
+          -- With channel communication
+          | OPTF {                                 termToRemoveOrKeep :: Term } -- optional term for remove on fail
+          | OPTS { termForSuccessOrRemove :: Term, termToRemoveOrKeep :: Term } -- optional term for remove after success
+          
+          -- Without channel communication between terms inside this operators
+          | PLUS [Term] -- success one or more to success
+          | CONJ [Term] -- fail one or more to fail
+          | PROD [Term] -- success only if every term is succesefull
+          | DISJ [Term] -- success only if every term is fail but only one is success
 
-          | UBFF { useBindFromFuture  :: Chan, chooseAlterFromPipe :: Chan } -- use bind from future   ( bff ) choose
-          | LSBT { newBindToLeftSide  :: Chan, offerAlterToPipe    :: Chan } -- bind to left side      < newBindTLS > offer
-
-
-          | UseBindFromPast   { questToCommPipe   :: Chan, useBindFromPastAndNameSendIt :: Chan }
-          | UseBindFromFuture { useBindFromFuture :: Chan, chooseAlterForBindUse :: Chan }
-
-          | BindToRightSide { chanToWait :: Chan, nameToBind  :: Chan }
-          | BindToLeftSide  { bindToWait :: Chan, nameToAlter :: Chan }
-
-
-
-          | OptW { chanToWait :: Chan }
-          | OptF  Term
-          | Comm [Term]
-          | Ordr [Term]
-          | Serv  Term
-          | Log2  Term
 
  deriving (Eq,Ord)
 
-{-
-
-! test1 . a<d> . _b(f) . a<d> ;
-
-
-! a ( _b ) , _b<c> . _b(e) ;
-
-
-optional once in serve
-
-
--}
 
 
 
