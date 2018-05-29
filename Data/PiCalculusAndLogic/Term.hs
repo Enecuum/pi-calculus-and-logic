@@ -15,9 +15,19 @@ data Term = Empt | Fail
           | Recv { bindToWait :: Chan, nameToAlter :: Chan } -- < a > [ b ]  bindToLeftSide
 
 
+-- FPUB
+-- UBFF
+-- BTRS
+-- LSBT
+
+          | FPUB { questToCommPipe    :: Chan, useBindFromPast     :: Chan } -- use bind from past     quest < bfp >
+          | BTRS { listenFromCommPipe :: Chan, newBindToRightSide  :: Chan } -- bind to right side     listen ( newBindTRS )
+
+          | UBFF { useBindFromFuture  :: Chan, chooseAlterFromPipe :: Chan } -- use bind from future   ( bff ) choose
+          | LSBT { newBindToLeftSide  :: Chan, offerAlterToPipe    :: Chan } -- bind to left side      < newBindTLS > offer
 
 
-          | UseBindFromPast   { questToCommPipe   :: Chan, bindToUseAndSendIt    :: Chan }
+          | UseBindFromPast   { questToCommPipe   :: Chan, useBindFromPastAndNameSendIt :: Chan }
           | UseBindFromFuture { useBindFromFuture :: Chan, chooseAlterForBindUse :: Chan }
 
           | BindToRightSide { chanToWait :: Chan, nameToBind  :: Chan }
