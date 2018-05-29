@@ -29,6 +29,18 @@ data Term = Empt | Fail
 
  deriving (Eq,Ord)
 
+{-
+
+! test1 . a<d> . _b(f) . a<d> ;
+
+
+! a ( _b ) , _b<c> . _b(e) ;
+
+
+optional once in serve
+
+
+-}
 
 
 
