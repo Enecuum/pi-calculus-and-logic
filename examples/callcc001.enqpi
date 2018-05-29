@@ -1,0 +1,12 @@
+#!/usr/local/bin/enqpi --print-term
+
+# a e b c: a c e -> a b e
+
+  { c() . { prev ⅋ call } } . e<>
+
+b(s) . s(t) . e<t>
+
+
+a<> . b<> . CALLCC { c<> . e<> } . f<> . g<>
+
+
