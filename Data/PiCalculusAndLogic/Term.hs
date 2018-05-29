@@ -47,8 +47,9 @@ data Term = Empt | Fail
                         --                                       and output channel must put input  channel only
 
           -- Foreign terms and tools
-          | PROX       Dynamic -- proxy for dynamic from haskell
           | DBUG  Term Dynamic -- use dynamics for term debugging
+          | PROX       Dynamic -- pure functional proxy for dynamic from haskell
+          | SEFF       Dynamic -- proxy for side effects
 
 
  deriving (Eq,Ord,Show)
