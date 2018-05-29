@@ -26,9 +26,6 @@ data Term = Empt | Fail
           -- Operators for logic
 
           -- With channel communication
-          | OPTF {                                 termToRemoveOrKeep :: Term } -- optional term for remove on fail
-          | OPTS { termForSuccessOrRemove :: Term, termToRemoveOrKeep :: Term } -- optional term for remove after success
-
           | PATT [Term] -- if less term in order is success after fail of previous terms all terms is removed except this one
           | POOL [Term] -- greather terms in order must use duplication less than first in order
           
