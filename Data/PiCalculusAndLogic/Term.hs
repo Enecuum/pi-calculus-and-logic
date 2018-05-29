@@ -3,6 +3,7 @@
 module Data.PiCalculusAndLogic.Term where
 
 import Data.SymbolForChan
+import Data.Dynamic
 
 data Term = Empt | Fail
 
@@ -50,7 +51,14 @@ data Term = Empt | Fail
           | DBUG  Term Dynamic -- use dynamics for term debugging
 
 
- deriving (Eq,Ord)
+ deriving (Eq,Ord,Show)
+
+instance Ord Dynamic where
+  compare _ _ = EQ
+
+instance Eq Dynamic where
+  (==) _ _ = True
+
 
 
 
