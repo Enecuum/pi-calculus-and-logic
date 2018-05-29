@@ -14,11 +14,16 @@ data Term = Empt | Fail
           | Send { nextToBind :: Chan, alterToSend :: Chan } -- ( a ) [ b ]
           | Recv { bindToWait :: Chan, nameToAlter :: Chan } -- < a > [ b ]  bindToLeftSide
 
-          | UseBindFromPast   { questToCommPipe   :: Chan, bindToUseAndSendIt :: Chan }
-          | UseBindFromFuture { useBindFromFuture :: Chan, alterToSend        :: Chan }
 
-          | BindToRightSide { chanToWait :: Chan, nameToBind :: Chan }
-          | BindToLeftSide  { bindToWait :: Chan, nameToChan :: Chan }
+
+
+          | UseBindFromPast   { questToCommPipe   :: Chan, bindToUseAndSendIt    :: Chan }
+          | UseBindFromFuture { useBindFromFuture :: Chan, chooseAlterForBindUse :: Chan }
+
+          | BindToRightSide { chanToWait :: Chan, nameToBind  :: Chan }
+          | BindToLeftSide  { bindToWait :: Chan, nameToAlter :: Chan }
+
+
 
           | OptW { chanToWait :: Chan }
           | OptF  Term
