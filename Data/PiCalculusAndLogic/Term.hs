@@ -51,6 +51,9 @@ data Term = Empt | Fail
           | PROX       Dynamic -- pure functional proxy for dynamic from haskell
           | SEFF       Dynamic -- proxy for side effects
 
+          -- Hinding tools
+          | PRIO  Term Double  -- look to priority in search
+
 
  deriving (Eq,Ord,Show)
 
