@@ -17,7 +17,9 @@
 ! { ()archA & ()archB & ()archC } ⊗ placeD<> ⊗ placeE<> ;
 
 # inhibitor arc
-# reset arc
+# reset arc от того плэса от которого идят арка при стабатывании траззиции токены сбрасываются на ноль
 # ихибитор запрещяет когда есть
+# read arch, test arch
+# timed arch арка работает когда есть требование time range
 
 
