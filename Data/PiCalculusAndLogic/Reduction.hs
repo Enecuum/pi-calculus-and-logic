@@ -12,7 +12,12 @@ norm a = a
 
 reduce :: Seed -> (Term,Seed) -> (Term,Seed)
 
-reduce sa (COMM (FPUB a b : ORDR (BTRS c d : e) : f),sb) | a == c = (norm $ COMM [replaceBindR b d (ORDR e), g], sc)
+reduce sa (COMM (FPUB a b : ORDR (BTRS c d : e) : f),sb)
+  | a == c = (norm $ COMM [replaceBindR b d (ORDR e), g], sc)
+ where (g,sc) = reduce (sa+1) (ORDR f,sb+1)
+
+reduce sa (COMM (UBFF a b : ORDR (reverse -> (LSBT c d : e)) : f),sb)
+  | b == d = (norm $ COMM [replaceBindL a c (ORDR e), g], sc)
  where (g,sc) = reduce (sa+1) (ORDR f,sb+1)
 
 replaceBindR a b (ORDR (FPUB c d : e))
@@ -23,7 +28,7 @@ replaceBindR a b (ORDR (FPUB c d : e))
  where f = replaceBindR a b (ORDR e)
 
 replaceBindR a b (ORDR (BTRS c d : e))
-   | b == c    = norm $ ORDR [BTRS a a, f]
+   | b == c    = norm $ ORDR [BTRS a d, f]
    | otherwise = norm $ ORDR [BTRS c d, f]
  where f = replaceBindR a b (ORDR e)
 
@@ -35,7 +40,7 @@ replaceBindL a b (ORDR (reverse -> (UBFF c d : e)))
  where f = replaceBindL a b (ORDR e)
 
 replaceBindL a b (ORDR (reverse -> (LSBT c d : e)))
-   | b == c    = norm $ ORDR [f, LSBT a a]
+   | b == d    = norm $ ORDR [f, LSBT c a]
    | otherwise = norm $ ORDR [f, LSBT c d]
  where f = replaceBindL a b (ORDR e)
   
