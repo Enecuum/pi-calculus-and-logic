@@ -1,6 +1,7 @@
 
 import Control.Concurrent.STM.TVar
 import System.IO.Unsafe
+import System.Random
 
 data Term
  = MROOT -- Multiplicative root of top formula, expresion must be equal to multiplicative unit for success
@@ -15,6 +16,9 @@ data Term
  | NEGAT Term -- Additive negatation, negative numbers for example
  | OFCRS Term -- Of-course exponential operator
  | WHYNT Term -- Why-not exponential operator
+
+ | Share UniqueShare
+ | Focus Term
 
  | Atom Descr
 
@@ -33,6 +37,19 @@ termMapM p f o@(OFCRS a) | p o = do b <- f a; return (OFCRS b)
 termMapM p f o@(WHYNT a) | p o = do b <- f a; return (WHYNT b)
 termMapM _ _ o = return o
 
+data UniqueShare = USH Integer
+
+instance Show UniqueShare where
+  show (USH a) = "sh" ++ show (a `mod` 99)
+
+instance Eq UniqueShare where
+  USH a == USH b = a == b
+
+newUniqueShare :: IO Term
+newUniqueShare = do
+  a <- randomRIO (2^80,2^90)
+  return $ Share $ USH a
+
 data Pattern = ConstName String | ConstId Integer | UniqueId Integer | UniqueWildcard Integer
  deriving (Eq)
 
@@ -50,6 +67,17 @@ instance Show Descr where
 at x = unsafePerformIO $ do
   tv <- newTVarIO Nothing
   return $ Atom $ Descr [ConstName x] tv
+
+rotateFocus [(Focus a `CMCNJ` Focus b, c)] = unsafePerformIO $ do
+  shB <- newUniqueShare
+  let rot01 = rotateFocus [(a, c `CMCNJ` (INVRT shB))]
+  let rot02 = rotateFocus [(b, shB)] -- term b equal to shB
+  return $ rot01 ++ rot02
+
+rotateFocus [(Focus a `CMCNJ` b, c)] = rotateFocus [(a, c `CMCNJ` (INVRT b))]
+rotateFocus [(a `CMCNJ` Focus b, c)] = rotateFocus [(b, c `CMCNJ` (INVRT a))]
+
+rotateFocus (a:b) = rotateFocus [a] ++ rotateFocus b
 
 {-
 
