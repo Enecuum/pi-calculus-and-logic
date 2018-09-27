@@ -16,23 +16,38 @@ data Term
  | OFCRS Term
  | WHYNT Term
 
-
  | Atom Descr
+
  deriving (Show,Eq)
 
-data Descr = Descr { path :: [Maybe (Either String Integer)], isReduced :: TVar (Maybe Integer) }
+data Pattern = ConstName String | ConstId Integer | UniqueId Integer | UniqueWildcard Integer
+ deriving (Eq)
+
+data Descr   = Descr { path :: [Pattern], isReduced :: TVar (Maybe Integer) }
  deriving (Eq)
 
 instance Show Descr where
   show (Descr a b) = concat $ map (':':) $ map f a
    where
-    f Nothing = "*"
-    f (Just (Left a)) = a
-    f (Just (Right a)) = show a
+    f (UniqueWildcard _) = "*"
+    f (ConstName a) = a
+    f (UniqueId a) = "uid" ++ show a
+    f (ConstId a) = "id" ++ show a
 
 at x = unsafePerformIO $ do
   tv <- newTVarIO Nothing
-  return $ Atom $ Descr [Just $ Left x] tv
+  return $ Atom $ Descr [ConstName x] tv
+
+{-
+
+
+ конструкции
+
+ a * b * a^-1
+ c^-1 * d * c
+
+
+ -}
 
 
 
