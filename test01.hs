@@ -5,6 +5,7 @@ import System.Random
 import Data.Maybe
 import Data.Functor.Identity
 import Control.Monad.State.Lazy
+import Data.Tuple
 
 data Term
  = MROOT -- Multiplicative root of top formula, expresion must be equal to multiplicative unit for success
@@ -27,7 +28,8 @@ data Term
 
  deriving (Show,Eq)
 
-tupleMap f (a,b) = (f a, f b)
+tupleMap      f (a,b) = (f a, f b)
+tupleMapFirst f (a,b) = (f a,   b)
 
 -- predicate -> termFunctorM -> originalTerm -> m transformatedTerm
 termMapM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
@@ -79,6 +81,10 @@ termHylo p f g a = runIdentity $ termHyloM p (return . f) (return . g) a
 termPara p f   a = runIdentity $ termParaM p (return . f) a
 termApo  p f   a = runIdentity $ termApoM  p (return . f) a
 
+reduceToNorm (INVRT (INVRT a)) = a
+reduceToNorm (NEGAT (NEGAT a)) = a
+reduceToNorm a = a
+
 isFocusExistInTermOp :: Term -> Bool
 isFocusExistInTermOp a = snd $ runState (termMapM p f a) False
  where
@@ -87,6 +93,15 @@ isFocusExistInTermOp a = snd $ runState (termMapM p f a) False
   f :: Term -> State Bool Term
   f o@(Focus _) = put True >> return o
   f o           =             return o
+
+focusAll a = termCata p f a
+ where
+  p _ = True
+  f o@(Share _) =       o
+  f o@(Focus _) =       o
+  f o           = Focus o
+
+testFun01 x = map (tupleMap (termCata (const True) reduceToNorm)) $ rotateFocus $ map swap $ rotateFocus $ focup02 x
 
 class FocusUp a where
   focusUp :: a -> a
@@ -98,6 +113,8 @@ instance FocusUp Term where
     f a = a
 
 focup01 a = map (tupleMap focusUp) a
+
+focup02 a = map (tupleMap focusAll) a
 
 test01 = [(at "q" `CMCNJ` (Focus (at "w") `CMCNJ` at "e"), at "r" `CMCNJ` at "t")]
 test02 = [(at "q" `CMCNJ` (Focus (at "w") `CMCNJ` Focus (at "e")), at "r" `CMCNJ` at "t")]
