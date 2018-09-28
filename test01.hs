@@ -4,6 +4,7 @@ import System.IO.Unsafe
 import System.Random
 import Data.Maybe
 import Data.Functor.Identity
+import Control.Monad.State.Lazy
 
 data Term
  = MROOT -- Multiplicative root of top formula, expresion must be equal to multiplicative unit for success
@@ -37,6 +38,7 @@ termMapM p f o@(INVRT a) | p o = do b <- f a; return (INVRT b)
 termMapM p f o@(NEGAT a) | p o = do b <- f a; return (NEGAT b)
 termMapM p f o@(OFCRS a) | p o = do b <- f a; return (OFCRS b)
 termMapM p f o@(WHYNT a) | p o = do b <- f a; return (WHYNT b)
+termMapM p f o@(Focus a) | p o = do b <- f a; return (Focus b)
 termMapM _ _ o = return o
 
 toBinop (CMCNJ a b) = Just ((a,b),(CMCNJ,INVRT))
@@ -75,6 +77,25 @@ termHylo p f g a = runIdentity $ termHyloM p (return . f) (return . g) a
 termPara p f   a = runIdentity $ termParaM p (return . f) a
 termApo  p f   a = runIdentity $ termApoM  p (return . f) a
 
+isFocusExistInTermOp :: Term -> Bool
+isFocusExistInTermOp a = snd $ runState (termMapM p f a) False
+ where
+  p (Focus _) = False
+  p        _  = True
+  f :: Term -> State Bool Term
+  f o@(Focus _) = put True >> return o
+  f o           =             return o
+
+class FocusUp a where
+  focusUp :: a -> a
+
+instance FocusUp Term where
+  focusUp = termCata (const True) f
+   where
+    f a | isFocusExistInTermOp a = Focus a
+    f a = a
+
+test01 = [(at "q" `CMCNJ` (Focus (at "w") `CMCNJ` at "e"), at "r" `CMCNJ` at "t")]
 
 data UniqueShare = USH Integer
 
@@ -109,7 +130,7 @@ at x = unsafePerformIO $ do
 
 rotateFocus [] = []
 
-rotateFocus [(a,b)] | isJust c = case d of
+rotateFocus o@[(a,b)] | isJust c = case d of
   (Focus g, Focus h) -> unsafePerformIO $ do
     shH <- newUniqueShare
     let rot01 = rotateFocus [(g, e b $ f shH)]
@@ -117,6 +138,7 @@ rotateFocus [(a,b)] | isJust c = case d of
     return $ rot01 ++ rot02
   (Focus g, h) -> rotateFocus [(g, e b $ f h)]
   (g, Focus h) -> rotateFocus [(h, e (f g) h)]
+  _ -> o
  where
   c = toBinop a
   Just (d,(e,f)) = c
