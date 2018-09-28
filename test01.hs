@@ -76,6 +76,8 @@ at x = unsafePerformIO $ do
   tv <- newTVarIO Nothing
   return $ Atom $ Descr [ConstName x] tv
 
+rotateFocus [] = []
+
 rotateFocus [(a,b)] | isJust c = case d of
   (Focus g, Focus h) -> unsafePerformIO $ do
     shH <- newUniqueShare
