@@ -105,7 +105,7 @@ test02 = [(at "q" `CMCNJ` (Focus (at "w") `CMCNJ` Focus (at "e")), at "r" `CMCNJ
 data UniqueShare = USH Integer
 
 instance Show UniqueShare where
-  show (USH a) = "sh" ++ show (a `mod` 99)
+  show (USH a) = "#" ++ show (a `mod` 99)
 
 instance Eq UniqueShare where
   USH a == USH b = a == b
