@@ -3,6 +3,7 @@ import Control.Concurrent.STM.TVar
 import System.IO.Unsafe
 import System.Random
 import Data.Maybe
+import Data.Functor.Identity
 
 data Term
  = MROOT -- Multiplicative root of top formula, expresion must be equal to multiplicative unit for success
@@ -45,11 +46,22 @@ toBinop (CADSJ a b) = Just ((a,b),(CADSJ,NEGAT))
 toBinop (CACNJ a b) = Just ((a,b),(CACNJ,NEGAT))
 toBinop _ = Nothing
 
+-- predicate -> termAlgebraM -> originalTerm -> m transformatedTerm
 termCataM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
 termCataM p f a = termMapM p (termCataM p f) a >>= f
 
+-- predicate -> termCoAlgebraM -> originalTerm -> m transformatedTerm
 termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
 termAnaM p f a = f a >>= termMapM p (termAnaM p f)
+
+-- predicate -> termAlgebraM -> termNaturalTransformationM -> termCoAlgebraM -> originalTerm -> m transformatedTerm
+termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
+termHyloM p f e g a = g a >>= termMapM p (termHyloM p f e g) >>= e >>= f
+
+termCata p f     a = runIdentity $ termCataM p (return . f) a
+termAna  p f     a = runIdentity $ termAnaM  p (return . f) a
+termHylo p f e g a = runIdentity $ termHyloM p (return . f) (return . e) (return . g) a
+
 
 data UniqueShare = USH Integer
 
