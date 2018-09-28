@@ -2,6 +2,7 @@
 import Control.Concurrent.STM.TVar
 import System.IO.Unsafe
 import System.Random
+import Data.Maybe
 
 data Term
  = MROOT -- Multiplicative root of top formula, expresion must be equal to multiplicative unit for success
@@ -37,6 +38,13 @@ termMapM p f o@(OFCRS a) | p o = do b <- f a; return (OFCRS b)
 termMapM p f o@(WHYNT a) | p o = do b <- f a; return (WHYNT b)
 termMapM _ _ o = return o
 
+toBinop (CMCNJ a b) = Just ((a,b),(CMCNJ,INVRT))
+toBinop (CMDSJ a b) = Just ((a,b),(CMDSJ,INVRT))
+toBinop (NMCNJ a b) = Just ((a,b),(NMCNJ,INVRT))
+toBinop (CADSJ a b) = Just ((a,b),(CADSJ,NEGAT))
+toBinop (CACNJ a b) = Just ((a,b),(CACNJ,NEGAT))
+toBinop _ = Nothing
+
 data UniqueShare = USH Integer
 
 instance Show UniqueShare where
@@ -68,14 +76,17 @@ at x = unsafePerformIO $ do
   tv <- newTVarIO Nothing
   return $ Atom $ Descr [ConstName x] tv
 
-rotateFocus [(Focus a `CMCNJ` Focus b, c)] = unsafePerformIO $ do
-  shB <- newUniqueShare
-  let rot01 = rotateFocus [(a, c `CMCNJ` (INVRT shB))]
-  let rot02 = rotateFocus [(b, shB)] -- term b equal to shB
-  return $ rot01 ++ rot02
-
-rotateFocus [(Focus a `CMCNJ` b, c)] = rotateFocus [(a, c `CMCNJ` (INVRT b))]
-rotateFocus [(a `CMCNJ` Focus b, c)] = rotateFocus [(b, c `CMCNJ` (INVRT a))]
+rotateFocus [(a,b)] | isJust c = case d of
+  (Focus g, Focus h) -> unsafePerformIO $ do
+    shH <- newUniqueShare
+    let rot01 = rotateFocus [(g, e b $ f shH)]
+    let rot02 = rotateFocus [(h, shH)] -- term h equal to shH in sense of connected shares
+    return $ rot01 ++ rot02
+  (Focus g, h) -> rotateFocus [(g, e b $ f h)]
+  (g, Focus h) -> rotateFocus [(h, e (f g) h)]
+ where
+  c = toBinop a
+  Just (d,(e,f)) = c
 
 rotateFocus (a:b) = rotateFocus [a] ++ rotateFocus b
 
