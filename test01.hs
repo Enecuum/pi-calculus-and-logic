@@ -45,6 +45,12 @@ toBinop (CADSJ a b) = Just ((a,b),(CADSJ,NEGAT))
 toBinop (CACNJ a b) = Just ((a,b),(CACNJ,NEGAT))
 toBinop _ = Nothing
 
+termCataM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
+termCataM p f a = termMapM p (termCataM p f) a >>= f
+
+termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
+termAnaM p f a = f a >>= termMapM p (termAnaM p f)
+
 data UniqueShare = USH Integer
 
 instance Show UniqueShare where
