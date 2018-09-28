@@ -54,13 +54,26 @@ termCataM p f a = termMapM p (termCataM p f) a >>= f
 termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
 termAnaM p f a = f a >>= termMapM p (termAnaM p f)
 
--- predicate -> termAlgebraM -> termNaturalTransformationM -> termCoAlgebraM -> originalTerm -> m transformatedTerm
-termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
-termHyloM p f e g a = g a >>= termMapM p (termHyloM p f e g) >>= e >>= f
+-- predicate -> termAlgebraM -> termCoAlgebraM -> originalTerm -> m transformatedTerm
+termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
+termHyloM p f g a = g a >>= termMapM p (termHyloM p f g) >>= f
 
-termCata p f     a = runIdentity $ termCataM p (return . f) a
-termAna  p f     a = runIdentity $ termAnaM  p (return . f) a
-termHylo p f e g a = runIdentity $ termHyloM p (return . f) (return . e) (return . g) a
+-- predicate -> termGAlgebraM -> originalTerm -> m transformatedTerm
+termParaM :: Monad m => (Term -> Bool) -> ((Term, Term) -> m Term) -> Term -> m Term
+termParaM p f a = termMapM p (termParaM p f) a >>= curry f a
+
+termApoM :: Monad m => (Term -> Bool) -> (Term -> m (Either Term Term)) -> Term -> m Term
+termApoM p f a = do
+  b <- f a
+  case b of
+    Left  c -> return c
+    Right d -> termMapM p (termApoM p f) d
+
+termCata p f   a = runIdentity $ termCataM p (return . f) a
+termAna  p f   a = runIdentity $ termAnaM  p (return . f) a
+termHylo p f g a = runIdentity $ termHyloM p (return . f) (return . g) a
+termPara p f   a = runIdentity $ termParaM p (return . f) a
+termApo  p f   a = runIdentity $ termApoM  p (return . f) a
 
 
 data UniqueShare = USH Integer
