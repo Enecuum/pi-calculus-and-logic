@@ -9,10 +9,14 @@ import Control.Monad.State.Lazy
 import Data.Tuple
 
 import Catarotoid.Term
+import Catarotoid.MiscTools
+import Catarotoid.Morphisms
 
 dupReduce (INVRT (INVRT a)) = a
 dupReduce (NEGAT (NEGAT a)) = a
 dupReduce a = a
+
+dupReduceNet = map (tupleMap (termCata (const True) dupReduce))
 
 
 

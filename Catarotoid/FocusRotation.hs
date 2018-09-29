@@ -19,11 +19,11 @@ rotateFocus o@[(a,b)] | isJust c = case d of
   (Focus g, Focus h) -> unsafePerformIO $ do
     ushH <- newUniqueShare
     let shH = Share ushH
-    let rot01 = rotateFocus [(g, e b $ f shH)]
-    let rot02 = rotateFocus [(h, shH)] -- term h equal to shH in sense of connected shares
+    let rot01 = [(g, e b $ f shH)]
+    let rot02 = [(h, shH)] -- term h equal to shH in sense of connected shares
     return $ rot01 ++ rot02
-  (Focus g, h) -> rotateFocus [(g, e b $ f h)]
-  (g, Focus h) -> rotateFocus [(h, e (f g) b)]
+  (Focus g, h) -> [(g, e b $ f h)]
+  (g, Focus h) -> [(h, e (f g) b)]
   _ -> o
  where
   c = toBinop a

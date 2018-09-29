@@ -13,6 +13,9 @@ import Catarotoid.Pattern
 import Catarotoid.FocusRotation
 import Catarotoid.FocusUp
 import Catarotoid.Reductions
+import Catarotoid.MiscTools
+import Catarotoid.GraphViz
+import Catarotoid.Morphisms
 
 at x = unsafePerformIO $ do
   tv <- newTVarIO Nothing
@@ -21,7 +24,10 @@ at x = unsafePerformIO $ do
 test01 = [(at "q" `CMCNJ` (Focus (at "w") `CMCNJ` at "e"), at "r" `CMCNJ` at "t")]
 test02 = [(at "q" `CMCNJ` (Focus (at "w") `CMCNJ` Focus (at "e")), at "r" `CMCNJ` at "t")]
 
-
+test03 = [(MROOT, ((at "a" `CMCNJ` INVRT (at "b")) `NMCNJ` at "c") `CMCNJ` at "d")]
+test04 = [(MROOT, ((Focus (at "a") `CMCNJ` INVRT (at "b")) `NMCNJ` at "c") `CMCNJ` at "d")]
+test05 = [(MROOT, ((Focus (at "a") `CMCNJ` INVRT (at "b")) `NMCNJ` Focus (at "c")) `CMCNJ` at "d")]
+test06 = [(MROOT, ((at "a" `CMCNJ` INVRT (at "b")) `NMCNJ` at "c") `CMCNJ` Focus (at "d"))]
 
 
 
