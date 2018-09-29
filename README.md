@@ -17,3 +17,4 @@ Ok, 9 modules loaded.
 [(Atom :q `CMCNJ` (Focus (Atom :w) `CMCNJ` Focus (Atom :e)),Atom :r `CMCNJ` Atom :t)]
 *Catarotoid.SimpleTests01>
 ```
+![](/images/catarotoid001.gif)
