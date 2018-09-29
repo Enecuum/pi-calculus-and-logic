@@ -1,3 +1,5 @@
+module Catarotoid.Term where
+
 
 import Control.Concurrent.STM.TVar
 import System.IO.Unsafe
