@@ -10,6 +10,9 @@ import Data.Tuple
 
 import Catarotoid.Term
 import Catarotoid.Pattern
+import Catarotoid.FocusRotation
+import Catarotoid.FocusUp
+import Catarotoid.Reductions
 
 at x = unsafePerformIO $ do
   tv <- newTVarIO Nothing

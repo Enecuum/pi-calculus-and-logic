@@ -10,6 +10,7 @@ import Data.Tuple
 
 import Catarotoid.Term
 import Catarotoid.Morphisms
+import Catarotoid.MiscTools
 
 isFocusExistInTermOp :: Term -> Bool
 isFocusExistInTermOp a = snd $ runState (termMapM p f a) False

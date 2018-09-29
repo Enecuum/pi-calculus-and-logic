@@ -9,6 +9,7 @@ import Control.Monad.State.Lazy
 import Data.Tuple
 
 import Catarotoid.Term
+import Catarotoid.UniqueShare
 
 rotateFocus [] = []
 

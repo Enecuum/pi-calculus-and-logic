@@ -9,6 +9,7 @@ import Control.Monad.State.Lazy
 import Data.Tuple
 
 import Catarotoid.UniqueShare
+import Catarotoid.Pattern
 
 data Term
  = MROOT -- Multiplicative root of top formula, expresion must be equal to multiplicative unit for success
