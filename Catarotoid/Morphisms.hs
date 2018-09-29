@@ -26,6 +26,7 @@ termHyloM p f g a = g a >>= termMapM p (termHyloM p f g) >>= f
 termParaM :: Monad m => (Term -> Bool) -> ((Term, Term) -> m Term) -> Term -> m Term
 termParaM p f a = termMapM p (termParaM p f) a >>= curry f a
 
+-- predicate -> termGCoAlgebraM -> originalTerm -> m tranformatedTerm
 termApoM :: Monad m => (Term -> Bool) -> (Term -> m (Either Term Term)) -> Term -> m Term
 termApoM p f a = do
   b <- f a
