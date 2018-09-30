@@ -8,7 +8,7 @@ import Data.Functor.Identity
 import Control.Monad.State.Lazy
 import Data.Tuple
 
-data Pattern = ConstName String | ConstId Integer | UniqueId Integer | UniqueWildcard Integer
+data Pattern = ConstName String | ConstId Integer | UniqueId Integer | UniqueWildcard Integer | BlackHole | Binding
  deriving (Eq)
 
 data Descr   = Descr { path :: [Pattern], isReduced :: TVar (Maybe Integer) }
