@@ -1,15 +1,15 @@
-module PiCalculus.TranslationToCatarotoid where
+module PiCalculusLogic.Catarotoid where
 
 
 {-
 
 a<g>
 
-( a1^-1 . sec:b . a2^-1 ) in formula
+( a1^-1 . sec:b^-1 . a2^-1 ) in formula
 
 ( (@ u)
-  (   ! u . ( ! r1^-1 . sec:b^-1 . g1    . g2    . r2^-1 ) . u^-1
-    * ! u . ( ! s1^-1 . sec:b^-1 . g1^-1 . g2^-1 . s2^-1 ) . u^-1
+  (   ! u . ( ! r1^-1 . sec:b . g1    . g2    . r2^-1 ) . u^-1
+    * ! u . ( ! s1^-1 . sec:b . g1^-1 . g2^-1 . s2^-1 ) . u^-1
     * u^-1
     * u
   )
@@ -17,15 +17,15 @@ a<g>
 
 a(h)
 
-( a2 . sec:$b^-1 . a1 ) in formula
+( a2 . sec:$b . a1 ) in formula
 
 ( (@ u)
-  (   ! u . ( ! h1^-1 . r1 . sec:$b . r2 . h2^-1 ) . u^-1
-    * ! u . ( ! h1    . s1 . sec:$b . s2 . h2    ) . u^-1
+  (   ! u . ( ! h1^-1 . r1 . sec:$b^-1 . r2 . h2^-1 ) . u^-1
+    * ! u . ( ! h1    . s1 . sec:$b^-1 . s2 . h2    ) . u^-1
     * u^-1
     * u
   )
-)
+) in global multiplication
    
 
 
