@@ -3,27 +3,75 @@ module PiCalculus.TranslationToCatarotoid where
 
 {-
 
+
+
 a<g>
 
 a1^-1 . sec:b . sec:c . sec:d . sec:e . a2^-1 .
-  (   ! sec:b^-1 . g1    . g2    . sec:c^-1
-    * ! sec:d^-1 . g1^-1 . g2^-1 . sec:e^-1
+  (@ u)
+  (   ! u . ( ! sec:b^-1 . g1    . g2    . sec:c^-1 ) . u^-1
+    * ! u . ( ! sec:d^-1 . g1^-1 . g2^-1 . sec:e^-1 ) . u^-1
+    * u^-1
+    * u
     * p
   )
 
 a(h)
 
 a1 . sec:$b^-1 . sec:$c^-1 . sec:$d^-1 . sec:$e^-1 . a2 .
-  (   ! h1^-1 . sec:$b . sec:$c . h2^-1
-    * ! h1    . sec:$d . sec:$e . h2
+  (@ u)
+  (   ! u . ( ! h1^-1 . sec:$b . sec:$c . h2^-1 ) . u^-1
+    * ! u . ( ! h1    . sec:$d . sec:$e . h2    ) . u^-1
+    * u^-1
+    * u
     * q
   )
+
+
+
+( ! a . b ) * ( ! c . b ) * b^-1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 a1 . sec:$b^-1 . sec:$c^-1 . sec:$d^-1 . sec:$e^-1 . a2 .
   (   ! u . ( v^-1 * ! v^-1 ) . ( ! v . h1^-1 . sec:$b . sec:$c . h2^-1 ) . u^-1
     * ! u . ( v^-1 * ! v^-1 ) . ( ! v . h1    . sec:$d . sec:$e . h2    ) . u^-1
     * u^-1
     * q . u
+  )
+
+
+
+a1 . sec:$b^-1 . sec:$c^-1 . sec:$d^-1 . sec:$e^-1 . a2 .
+  (   ! h1^-1 . sec:$b . sec:$c . h2^-1
+    * ! h1    . sec:$d . sec:$e . h2
+    * q
   )
 
 
