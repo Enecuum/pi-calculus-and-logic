@@ -3,6 +3,49 @@ module PiCalculusLogic.Catarotoid where
 
 {-
 
+
+a<g>
+
+( ( a2^-1 . a1^-1 ) * sec:b^-1 )
+
+( (@ u)
+  (   ! u . ( ! r1^-1 . ( sec:b * ( g1    . g2    ) ) . r2^-1 ) . u^-1
+    * ! u . ( ! s1^-1 . ( sec:b * ( g1^-1 . g2^-1 ) ) . s2^-1 ) . u^-1
+    * u^-1
+    * u
+  )
+)
+
+a(h)
+
+( ( a1 . a2 ) * sec:$b )
+
+( (@ u)
+  (   ! u . ( ! h1^-1 . r1 . sec:$b^-1 . r2 . h2^-1 ) . u^-1
+    * ! u . ( ! h2    . s1 . sec:$b^-1 . s2 . h1    ) . u^-1
+    * u^-1
+    * u
+  )
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
 a<g>
 
 ( a1^-1 . sec:b^-1 . a2^-1 ) in formula
