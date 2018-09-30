@@ -5,6 +5,9 @@ module PiCalculus.Translation.Catarotoid where
 
 a<g>
 
+g1 and g2^-1 commutes
+g1^-1 and g2 commutes
+
 a1^-1 . sec:b . sec:c . sec:d . sec:e . a2^-1 .
   (   ! sec:b^-1 . g1    . g2    . sec:c^-1
     * ! sec:d^-1 . g1^-1 . g2^-1 . sec:e^-1
