@@ -16,6 +16,8 @@ dupReduce (INVRT (INVRT a)) = a
 dupReduce (NEGAT (NEGAT a)) = a
 dupReduce a = a
 
+--atomInvNorm
+
 dupReduceNet = map (tupleMap (termCata (const True) dupReduce))
 
 

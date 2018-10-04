@@ -30,7 +30,13 @@ test05 = [(MROOT, ((Focus (at "a") `CMCNJ` INVRT (at "b")) `NMCNJ` Focus (at "c"
 test06 = [(MROOT, ((at "a" `CMCNJ` INVRT (at "b")) `NMCNJ` at "c") `CMCNJ` Focus (at "d"))]
 
 
+test07 = [(MROOT, ((at "a" `CMDSJ` INVRT (at "b")) `NMCNJ` at "c") `CMCNJ` (INVRT (at "a") `NMCNJ` INVRT (at "c")))]
+test08 = [(MROOT, ((at "a" `CMDSJ` INVRT (at "b")) ) `CMCNJ` (INVRT (at "a")  ))]
+test09 = [(MROOT, (at "a" `CMCNJ` INVRT (at "a")) `CMDSJ` INVRT (at "b"))]
 
+
+test10 = [(MROOT, ((at "a" `CMDSJ` INVRT (at "b")) `NMCNJ` (at "c" `CMDSJ` at "d")) `CMCNJ` (INVRT (at "a") `NMCNJ` at "b" `NMCNJ` INVRT (at "c") `NMCNJ` INVRT (at "d")))]
+test11 = [(MROOT, ((at "a" `CMDSJ` INVRT (at "b")) `NMCNJ` (at "c" `CMDSJ` at "d")) `CMCNJ` (Focus (INVRT (at "a") `NMCNJ` at "b") `NMCNJ` INVRT (at "c") `NMCNJ` INVRT (at "d")))]
 
 
 

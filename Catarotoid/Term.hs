@@ -12,14 +12,18 @@ import Catarotoid.UniqueShare
 import Catarotoid.Pattern
 
 data Term
- = MROOT -- Multiplicative root of top formula, expresion must be equal to multiplicative unit for success
- | AUNIT -- Additive unit, a+0 == a
- | MUNIT -- Multiplicative unit, a*1 == a, or for example matrix * identitiy matrix for non commutative case
+ = MCSOLVE -- Multiplicative conjunction solve of top formula, expresion must be equal to multiplicative conjunction unit for success
+ | ADUNIT -- Additive disjunction unit, a+0 == a
+ | ACUNIT -- Additive conjunction unit, a&⊤ == a
+ | MCUNIT -- Multiplicative conjunction unit, a*1 == a, or for example matrix * identitiy matrix for non commutative case
+ | MDUNIT -- Multiplicative disjunction unit, a⅋⊥ == a
  | Term `CMCNJ` Term -- Commutative Multiplicative Conjunction
  | Term `CMDSJ` Term -- Commutative Multiplicative Disjunction
  | Term `NMCNJ` Term -- Non-Commutative Associative Multiplicative Conjunction (like matrix multiplication for example)
+ | Term `NMDSJ` Term -- Non-Commutative Associative Multiplicative Disjunction
  | Term `CADSJ` Term -- Commutative Additive Disjunction
  | Term `CACNJ` Term -- Commutative Additive Conjunction
+ | LLINV Term -- Linear Logic Multiplicative inverse, a^⊥
  | INVRT Term -- Multiplicative inverse, a^-1 or like matrix inverse for non commutative
  | NEGAT Term -- Additive negatation, negative numbers for example
  | OFCRS Term -- Of-course exponential operator

@@ -70,6 +70,14 @@ termToGraphViz a = do writeFile "/tmp/1.dot" "\n"
     fun d a
     fun d b
 
+   fun link (a `CMDSJ` b) = do
+    c <- randomRIO (2^32,2^48 :: Int)
+    let d = "mdsj" ++ show c
+    putStr $ "  " ++ d ++ " [label=\"⅋\",shape=none,fontsize=40]\n"
+    putStr $ "  " ++ link ++ " -> " ++ d ++ "\n"
+    fun d a
+    fun d b
+
    fun link (a `NMCNJ` b) = do
     c <- randomRIO (2^32,2^48 :: Int)
     let d = "concat" ++ show c

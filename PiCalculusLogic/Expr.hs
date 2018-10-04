@@ -8,6 +8,9 @@ data Expr
    | Recv { chanToWait :: [Pattern], nameToBind :: [Pattern] }
    | Scop { newChannelName :: [Pattern] }
    | Expr `Comm` Expr
+   | Expr `Sepa` Expr
+   | Expr `Case` Expr
+   | Expr `Nond` Expr
    | Serv Expr
 
 
