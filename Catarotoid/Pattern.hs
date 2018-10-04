@@ -9,7 +9,7 @@ import Control.Monad.State.Lazy
 import Data.Tuple
 
 data Pattern = ConstName String | ConstId Integer | UniqueId Integer | UniqueWildcard Integer | BlackHole | Binding
- deriving (Eq)
+ deriving (Eq,Show)
 
 data Descr   = Descr { path :: [Pattern], isReduced :: TVar (Maybe Integer) }
  deriving (Eq)
