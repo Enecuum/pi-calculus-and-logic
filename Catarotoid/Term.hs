@@ -32,6 +32,8 @@ data Term a
  | Share UniqueShare
  | Focus (Term a)
 
+ | Nat Integer
+
  | Atom Descr
 
  | Expr a
