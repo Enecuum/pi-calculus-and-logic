@@ -8,8 +8,8 @@ import SequentCalculus.Types
 instance Indeterminant (Term (Sqcalc Term Side)) where
   va name = Expr (Indet name)
 
-catarotoidRules :: [Sqcalc Term Rule]
-catarotoidRules =
+rulesLinearLogic :: [Sqcalc Term Rule]
+rulesLinearLogic =
 
 
   [                 Sdset [va "Γ", va "A", va "B"] `Turns` va "Δ"
