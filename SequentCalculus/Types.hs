@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, FlexibleInstances #-}
 
 {-
 
@@ -20,6 +20,7 @@ instance RuleSide Sequent
 instance RuleSide HyperSequent
 
 data Sqcalc t a where
+  Indet ::    String                                            -> Sqcalc t Side
   Lift  :: t (Sqcalc t Side)                                    -> Sqcalc t Side
   Tack  ::    Sqcalc t Side    -> Sqcalc t Side                 -> Sqcalc t Side
   Sdset ::   [Sqcalc t Side]                                    -> Sqcalc t Side
@@ -27,6 +28,12 @@ data Sqcalc t a where
   Sqset ::   [Sqcalc t Sequent]                                 -> Sqcalc t Sequent
   Sqhyp ::   [Sqcalc t Sequent]                                 -> Sqcalc t HyperSequent
   Infer :: (RuleSide a, RuleSide b) => Sqcalc t a -> Sqcalc t b -> Sqcalc t Rule
+
+class Indeterminant a where
+  va :: String -> a
+
+instance Indeterminant (Sqcalc t Side) where
+  va name = Indet name
 
 infixr 8 `Turns`
 infixr 7 `Infer`
