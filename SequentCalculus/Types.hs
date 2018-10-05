@@ -14,22 +14,9 @@ data Sqcalc t a where
   Sqset ::   [Sqcalc t Sequent]                    -> Sqcalc t Sequent
   Infer ::    Sqcalc t Sequent -> Sqcalc t Sequent -> Sqcalc t Rule
 
-data Classic a where
-  Elem  :: a                      -> Classic a
-  Indet :: String                 -> Classic a
-  Conj  :: Classic a -> Classic a -> Classic a
-  Disj  :: Classic a -> Classic a -> Classic a
-  Not   :: Classic a              -> Classic a
-
 infixr 8 `Turns`
 infixr 7 `Infer`
 
-classicRules :: [Sqcalc Classic Rule]
-classicRules =
-  [         Sdset [Lift (Indet "Γ"), Lift (Indet "A" `Conj` Indet "B")] `Turns` Lift (Indet "Δ")
-    `Infer` -------------------------------------------------------------------------------------
-            Sdset [Lift (Indet "Γ"), Lift (Indet "A"), Lift (Indet "B")] `Turns` Lift (Indet "Δ")
-  ]
 
 
 
