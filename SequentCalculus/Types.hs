@@ -7,6 +7,7 @@ https://en.wikipedia.org/wiki/Hypersequent
 https://en.wikipedia.org/wiki/Nested_sequent_calculus
 https://en.wikipedia.org/wiki/Category:Proof_theory
 https://arxiv.org/pdf/1004.1845.pdf Nested Sequents and Deep Inference
+https://www.researchgate.net/publication/225666320_Display_Logic/download Display Logic
 https://people.mpi-sws.org/~dg/papers/csf12.pdf Labeled Sequent Calculi for Access Control Logics: Countermodels, Saturation and Abduction
 
 -}
