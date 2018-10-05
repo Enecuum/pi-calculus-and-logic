@@ -5,6 +5,7 @@
 https://en.wikipedia.org/wiki/Sequent_calculus
 https://en.wikipedia.org/wiki/Hypersequent
 https://en.wikipedia.org/wiki/Nested_sequent_calculus
+https://en.wikipedia.org/wiki/Category:Proof_theory
 
 -}
 
