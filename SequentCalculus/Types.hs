@@ -25,7 +25,7 @@ data Sqcalc t a where
   Sdset ::   [Sqcalc t Side]                                    -> Sqcalc t Side
   Turns ::    Sqcalc t Side    -> Sqcalc t Side                 -> Sqcalc t Sequent
   Sqset ::   [Sqcalc t Sequent]                                 -> Sqcalc t Sequent
-  Hyper ::   [Sqcalc t Sequent]                                 -> Sqcalc t HyperSequent
+  Sqhyp ::   [Sqcalc t Sequent]                                 -> Sqcalc t HyperSequent
   Infer :: (RuleSide a, RuleSide b) => Sqcalc t a -> Sqcalc t b -> Sqcalc t Rule
 
 infixr 8 `Turns`
