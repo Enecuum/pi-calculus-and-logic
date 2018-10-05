@@ -1,5 +1,12 @@
 {-# LANGUAGE GADTs #-}
 
+{-
+
+https://en.wikipedia.org/wiki/Sequent_calculus
+https://en.wikipedia.org/wiki/Hypersequent
+
+-}
+
 module SequentCalculus.Types where
 
 data Side
