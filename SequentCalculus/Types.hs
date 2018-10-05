@@ -24,6 +24,7 @@ data Classic a where
 infixr 8 `Turns`
 infixr 7 `Infer`
 
+classicRules :: [Sqcalc Classic Rule]
 classicRules =
   [         Sdset [Lift (Indet "Γ"), Lift (Indet "A" `Conj` Indet "B")] `Turns` Lift (Indet "Δ")
     `Infer` -------------------------------------------------------------------------------------
