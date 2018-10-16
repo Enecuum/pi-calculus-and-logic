@@ -9,4 +9,4 @@ data Category a where
  Disjunction :: Category a -> Category a -> Category a
  Product     :: Category a -> Category a -> Category a
  CoProduct   :: Category a -> Category a -> Category a
- Category    :: Morphism m => Category a -> Category m -> Category a -> Category b
+ Category    :: Morphism m => { morphism :: Category m, domain :: Category a, codomain :: Category a } -> Category b
