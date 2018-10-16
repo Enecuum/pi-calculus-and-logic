@@ -16,7 +16,7 @@ class IsValidCategory a where
 
 class IsValidSetOfMorphisms a b where
 
-instance   IsValidCategory (Category (m,a,b)) where
+instance   IsValidCategory (Category (Ident,a,a)) where
 instance   IsValidCategory (Category Empty) where
 
 instance ( IsValidCategory (Category a)
