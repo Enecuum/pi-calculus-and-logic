@@ -1,11 +1,35 @@
-{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances #-}
 
 module MorphismCalculus where
+
+import GHC.TypeLits hiding (Symbol)
+import qualified GHC.TypeLits as T
 
 data Composition a b
 data Ident
 data Empty
 data Union a b
+data Symbol (a :: T.Symbol)
+
+class IsValidCategory a where
+
+class IsValidSetOfMorphisms a b where
+
+instance   IsValidCategory (Category (m,a,b)) where
+instance   IsValidCategory (Category Empty) where
+
+instance ( IsValidCategory (Category a)
+         , IsValidCategory (Category b)
+         , IsValidSetOfMorphisms a b
+         ) => IsValidCategory (Category (Union a b)) where
+
+instance ( IsValidCategory (Category (Union c d))
+         , IsValidCategory (Category (Union a c))
+         , IsValidCategory (Category (Union a d))
+         ) => IsValidSetOfMorphisms a (Union c d) where
+
+
+--instance (IsValidCategory (Category a), IsValidCategory (Category (Union c d))) => IsValidSetOfMorphisms a (Union c d) where
 
 class Morphism a where
 
@@ -28,8 +52,14 @@ data Category a where
  Disjunction :: Category a -> Category a -> Category a
  Product     :: Category a -> Category a -> Category a
  CoProduct   :: Category a -> Category a -> Category a
- Category    :: Morphism m => { morphism :: Category m, domain :: Category a, codomain :: Category a } -> Category b
+ Category    :: Morphism m => { morphism :: Category m, domain :: Category a, codomain :: Category b } -> Category (m,a,b)
  Composition :: (Morphism a, Morphism b) => Category a -> Category b -> Category (Composition a b)
+ Symbol      :: KnownSymbol a => Category (Symbol a)
  Ident       :: Category Ident
  Empty       :: Category Empty
  Union       :: Unionable a b => Category a -> Category b -> Category (Union a b)
+
+
+
+
+
