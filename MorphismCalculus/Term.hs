@@ -16,10 +16,6 @@ class IsValidCategory a where
 
 class IsValidSetOfMorphisms a b where
 
---class IsValidPairOfMorphisms a b c d e f | a -> b, a -> c, d -> e, d -> f where
-
---instance IsValidPairOfMorphisms a b c d e f where
-
 instance   IsValidCategory (Category (m,a,b)) where
 instance   IsValidCategory (Category Empty) where
 
@@ -28,19 +24,27 @@ instance ( IsValidCategory (Category a)
          , IsValidSetOfMorphisms a b
          ) => IsValidCategory (Category (Union a b)) where
 
-instance (IsValidPairOfMorphisms a b c d e f ~ 'True) => IsValidSetOfMorphisms (a,b,c) (d,e,f) where
+instance ( IsValidMorphism a b c ~ 'True
+         , IsValidMorphism d e f ~ 'True
+         , IsValidPairOfMorphisms a b c d e f ~ 'True) => IsValidSetOfMorphisms (a,b,c) (d,e,f) where
 
 instance ( IsValidCategory (Category (Union c d))
          , IsValidCategory (Category (Union a c))
          , IsValidCategory (Category (Union a d))
          ) => IsValidSetOfMorphisms a (Union c d) where
 
+type family IsValidMorphism a b c where
+  IsValidMorphism Ident a a = 'True
+  IsValidMorphism Ident a b = 'False
+  IsValidMorphism a b c = 'True
+
 type family IsValidPairOfMorphisms a b c d e f where
+  IsValidPairOfMorphisms a b c a b c = 'True
   IsValidPairOfMorphisms a b c a d e = 'False
   IsValidPairOfMorphisms a b c d e f = 'True
 
 
-test02 :: Category (Union (Symbol "a", Symbol "b", Symbol "c") (Symbol "f", Symbol "d", Symbol "e"))
+test02 :: Category (Union (Symbol "a", Symbol "b", Symbol "c") (Symbol "a", Symbol "b", Symbol "c"))
 test02 = undefined
 
 test03 :: IsValidCategory a => a -> a
