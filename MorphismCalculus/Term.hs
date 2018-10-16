@@ -51,8 +51,6 @@ test03 :: IsValidCategory a => a -> a
 test03 a = a
 
 
---instance (IsValidCategory (Category a), IsValidCategory (Category (Union c d))) => IsValidSetOfMorphisms a (Union c d) where
-
 class Morphism a where
 
 class Set a where
