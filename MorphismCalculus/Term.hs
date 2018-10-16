@@ -23,6 +23,8 @@ instance ( IsValidCategory (Category a)
          , IsValidSetOfMorphisms a b
          ) => IsValidCategory (Category (Union a b)) where
 
+instance IsValidSetOfMorphisms (a,b,c) (a,b,c) where
+
 instance ( IsValidCategory (Category (Union c d))
          , IsValidCategory (Category (Union a c))
          , IsValidCategory (Category (Union a d))
