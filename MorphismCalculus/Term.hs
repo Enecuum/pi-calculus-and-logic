@@ -1,9 +1,10 @@
-{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances, FunctionalDependencies #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances, FunctionalDependencies, TypeFamilies #-}
 
 module MorphismCalculus where
 
 import GHC.TypeLits hiding (Symbol)
 import qualified GHC.TypeLits as T
+import Data.Bool
 
 data Composition a b
 data Ident
@@ -15,7 +16,9 @@ class IsValidCategory a where
 
 class IsValidSetOfMorphisms a b where
 
-class IsValidPairOfMorphisms a b c d e f | a -> b, a -> c, d -> e, d -> f where
+--class IsValidPairOfMorphisms a b c d e f | a -> b, a -> c, d -> e, d -> f where
+
+--instance IsValidPairOfMorphisms a b c d e f where
 
 instance   IsValidCategory (Category (m,a,b)) where
 instance   IsValidCategory (Category Empty) where
@@ -25,12 +28,23 @@ instance ( IsValidCategory (Category a)
          , IsValidSetOfMorphisms a b
          ) => IsValidCategory (Category (Union a b)) where
 
-instance IsValidPairOfMorphisms a b c d e f => IsValidSetOfMorphisms (a,b,c) (d,e,f) where
+instance (IsValidPairOfMorphisms a b c d e f ~ 'True) => IsValidSetOfMorphisms (a,b,c) (d,e,f) where
 
 instance ( IsValidCategory (Category (Union c d))
          , IsValidCategory (Category (Union a c))
          , IsValidCategory (Category (Union a d))
          ) => IsValidSetOfMorphisms a (Union c d) where
+
+type family IsValidPairOfMorphisms a b c d e f where
+  IsValidPairOfMorphisms a b c a d e = 'False
+  IsValidPairOfMorphisms a b c d e f = 'True
+
+
+test02 :: Category (Union (Symbol "a", Symbol "b", Symbol "c") (Symbol "f", Symbol "d", Symbol "e"))
+test02 = undefined
+
+test03 :: IsValidCategory a => a -> a
+test03 a = a
 
 
 --instance (IsValidCategory (Category a), IsValidCategory (Category (Union c d))) => IsValidSetOfMorphisms a (Union c d) where
