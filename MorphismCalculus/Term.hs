@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances, FunctionalDependencies #-}
 
 module MorphismCalculus where
 
@@ -15,6 +15,8 @@ class IsValidCategory a where
 
 class IsValidSetOfMorphisms a b where
 
+class IsValidPairOfMorphisms a b c d e f | a -> b, a -> c, d -> e, d -> f where
+
 instance   IsValidCategory (Category (m,a,b)) where
 instance   IsValidCategory (Category Empty) where
 
@@ -23,7 +25,7 @@ instance ( IsValidCategory (Category a)
          , IsValidSetOfMorphisms a b
          ) => IsValidCategory (Category (Union a b)) where
 
-instance IsValidSetOfMorphisms (a,b,c) (a,b,c) where
+instance IsValidPairOfMorphisms a b c d e f => IsValidSetOfMorphisms (a,b,c) (d,e,f) where
 
 instance ( IsValidCategory (Category (Union c d))
          , IsValidCategory (Category (Union a c))
