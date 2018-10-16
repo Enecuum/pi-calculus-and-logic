@@ -1,10 +1,9 @@
-{-# LANGUAGE GADTs, MultiParamTypeClasses #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances #-}
 
 module MorphismCalculus where
 
 data Composition a b
 data Ident
-data Zero
 data Empty
 data Union a b
 
@@ -14,13 +13,15 @@ class Set a where
 
 class Unionable a b where
 
-instance Set Empty where
+instance Unionable Empty a where
+instance Unionable a a where
 
-instance Set (Category a) where
+instance (Unionable a b, Unionable a c) => Unionable a (Union b c) where
+instance (Unionable a c, Unionable b c) => Unionable (Union a b) c where
 
 instance (Morphism a, Morphism b) => Morphism (Composition a b) where
 instance Morphism Ident where
-instance Morphism Zero where
+instance Morphism Empty where
 
 data Category a where
  Conjunction :: Category a -> Category a -> Category a
@@ -30,6 +31,5 @@ data Category a where
  Category    :: Morphism m => { morphism :: Category m, domain :: Category a, codomain :: Category a } -> Category b
  Composition :: (Morphism a, Morphism b) => Category a -> Category b -> Category (Composition a b)
  Ident       :: Category Ident
- Zero        :: Category Zero
  Empty       :: Category Empty
- Union       :: (Set a, Set b, Unionable a b) => Category a -> Category b -> Category (Union a b)
+ Union       :: Unionable a b => Category a -> Category b -> Category (Union a b)
