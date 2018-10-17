@@ -81,7 +81,7 @@ type family IsValidMorphism a b c where
 
 type family IsValidPairOfMorphisms a b c d e f where
   IsValidPairOfMorphisms a b c a b c = 'True
-  IsValidPairOfMorphisms Ident b c Ident d e = 'True
+  IsValidPairOfMorphisms Ident a a Ident b b = 'True
   IsValidPairOfMorphisms a b c a d e = 'False
   IsValidPairOfMorphisms a b c d e f = 'True
 
@@ -89,10 +89,10 @@ type family IsValidPairOfMorphisms a b c d e f where
 test01 :: Category (Ident, Symbol "b", Symbol "b")
 test01 = undefined
 
-test02 :: Category (Union (Symbol "a", Symbol "b", Symbol "b") (Ident, Symbol "b", Symbol "b"))
+test02 :: Category ((Symbol "a", Symbol "b", Symbol "b") `Union` (Ident, Symbol "b", Symbol "b"))
 test02 = undefined
 
-test04 :: Category (Union (Union (Symbol "a", Symbol "b", Symbol "c") (Ident, Symbol "b", Symbol "b")) (Ident, Symbol "c", Symbol "c"))
+test04 :: Category ((Symbol "a", Symbol "b", Symbol "c") `Union` (Ident, Symbol "b", Symbol "b") `Union` (Ident, Symbol "c", Symbol "c"))
 test04 = undefined
 
 test03 :: IsValidCategory a => a -> a
