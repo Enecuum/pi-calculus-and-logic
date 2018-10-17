@@ -81,7 +81,8 @@ type family IsValidMorphism a b c where
 
 type family IsValidPairOfMorphisms a b c d e f where
   IsValidPairOfMorphisms a b c a b c = 'True
-  --IsValidPairOfMorphisms a b c a d e = 'False
+  IsValidPairOfMorphisms Ident b c Ident d e = 'True
+  IsValidPairOfMorphisms a b c a d e = 'False
   IsValidPairOfMorphisms a b c d e f = 'True
 
 
