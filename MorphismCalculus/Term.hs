@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances, FunctionalDependencies, TypeFamilies #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances, FunctionalDependencies, TypeFamilies, TypeOperators #-}
 
 module MorphismCalculus where
 
@@ -19,6 +19,13 @@ class IsValidSetOfMorphisms a b where
 instance   IsValidCategory (Category (Ident,a,a)) where
 instance   IsValidCategory (Category Empty) where
 
+instance ( (    IdentExist b d
+           `Or` IdentExist c d
+           `Or` IdentExist b (a,b,c)
+           `Or` IdentExist c (a,b,c)
+           ) ~ 'True
+         ) => IsValidCategory (Category (Union (a,b,c) d)) where
+
 instance ( IsValidCategory (Category a)
          , IsValidCategory (Category b)
          , IsValidSetOfMorphisms a b
@@ -28,10 +35,41 @@ instance ( IsValidMorphism a b c ~ 'True
          , IsValidMorphism d e f ~ 'True
          , IsValidPairOfMorphisms a b c d e f ~ 'True) => IsValidSetOfMorphisms (a,b,c) (d,e,f) where
 
-instance ( IsValidCategory (Category (Union c d))
-         , IsValidCategory (Category (Union a c))
-         , IsValidCategory (Category (Union a d))
+instance ( IsValidSetOfMorphisms c d
+         , IsValidSetOfMorphisms a c
+         , IsValidSetOfMorphisms a d
          ) => IsValidSetOfMorphisms a (Union c d) where
+
+data a :. b
+
+infixr :.
+
+type family GetListOfIdentedObjects a where
+  GetListOfIdentedObjects (Ident,a,a) = a :. ()
+  GetListOfIdentedObjects (Union a b) = UnionLists (GetListOfIdentedObjects a) (GetListOfIdentedObjects b)
+  GetListOfIdentedObjects a = ()
+
+type family GetListOfObjects a where
+  GetListOfObjects (a,b,b) = b :. ()
+  GetListOfObjects (a,b,c) = b :. c :. ()
+  GetListOfObjects (Union a b) = UnionLists (GetListOfObjects a) (GetListOfObjects b)
+  GetListOfObjects a = ()
+
+type family UnionLists a b where
+  UnionLists a () = a
+  UnionLists () a = a
+  UnionLists (a :. b) (a :. d) = a :. UnionLists b d
+  UnionLists (a :. b) (c :. d) = a :. c :. UnionLists b d
+
+type family IdentExist a b where
+  IdentExist a (Ident,a,a) = 'True
+  IdentExist a (Union b c) = IdentExist a b `Or` IdentExist a c
+  IdentExist a b = 'False
+
+type family a `Or` b where
+  Or 'True a = 'True
+  Or a 'True = 'True
+  Or a a     = 'False
 
 type family IsValidMorphism a b c where
   IsValidMorphism Ident a a = 'True
