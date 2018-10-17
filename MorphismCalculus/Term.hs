@@ -19,16 +19,7 @@ class IsValidSetOfMorphisms a b where
 instance   IsValidCategory (Category (Ident,a,a)) where
 instance   IsValidCategory (Category Empty) where
 
-instance ( (    IdentExist b d
-           `Or` IdentExist c d
-           `Or` IdentExist b (a,b,c)
-           `Or` IdentExist c (a,b,c)
-           ) ~ 'True
-         ) => IsValidCategory (Category (Union (a,b,c) d)) where
-
-instance ( IsValidCategory (Category a)
-         , IsValidCategory (Category b)
-         , IsValidSetOfMorphisms a b
+instance ( ( GetListOfObjects (Union a b) `SubstractListSet` GetListOfIdentedObjects (Union a b) ) ~ ()
          ) => IsValidCategory (Category (Union a b)) where
 
 instance ( IsValidMorphism a b c ~ 'True
@@ -43,6 +34,12 @@ instance ( IsValidSetOfMorphisms c d
 data a :. b
 
 infixr :.
+
+type family a `SubstractListSet` b where
+  SubstractListSet () a = ()
+  SubstractListSet a () = a
+  SubstractListSet (a :. b) (a :. c) = SubstractListSet b (a :. c)
+  SubstractListSet a (b :. c) = SubstractListSet a c `SubstractListSet` (b :. ())
 
 type family GetListOfIdentedObjects a where
   GetListOfIdentedObjects (Ident,a,a) = a :. ()
