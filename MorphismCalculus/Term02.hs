@@ -1,4 +1,4 @@
-module MorphismCalculus.Term2 where
+module MorphismCalculus.Term02 where
 
 data Term a
    = Idnt
