@@ -16,12 +16,12 @@ class IsValidCategory a where
 
 class IsValidSetOfMorphisms a b where
 
-instance   IsValidCategory (Category (Ident,a,a)) where
-instance   IsValidCategory (Category Empty) where
+instance   IsValidCategory (Term (Ident,a,a)) where
+instance   IsValidCategory (Term Empty) where
 
 instance ( ( GetListOfObjects (Union a b) `SubstractListSet` GetListOfIdentedObjects (Union a b) ) ~ ()
          , IsValidSetOfMorphisms a b
-         ) => IsValidCategory (Category (Union a b)) where
+         ) => IsValidCategory (Term (Union a b)) where
 
 instance ( IsValidMorphism a b c ~ 'True
          , IsValidMorphism d e f ~ 'True
@@ -86,13 +86,13 @@ type family IsValidPairOfMorphisms a b c d e f where
   IsValidPairOfMorphisms a b c d e f = 'True
 
 
-test01 :: Category (Ident, Symbol "b", Symbol "b")
+test01 :: Term (Ident, Symbol "b", Symbol "b")
 test01 = undefined
 
-test02 :: Category ((Symbol "a", Symbol "b", Symbol "b") `Union` (Ident, Symbol "b", Symbol "b"))
+test02 :: Term ((Symbol "a", Symbol "b", Symbol "b") `Union` (Ident, Symbol "b", Symbol "b"))
 test02 = undefined
 
-test04 :: Category ((Symbol "a", Symbol "b", Symbol "c") `Union` (Ident, Symbol "b", Symbol "b") `Union` (Ident, Symbol "c", Symbol "c"))
+test04 :: Term ((Symbol "a", Symbol "b", Symbol "c") `Union` (Ident, Symbol "b", Symbol "b") `Union` (Ident, Symbol "c", Symbol "c"))
 test04 = undefined
 
 test03 :: IsValidCategory a => a -> a
@@ -119,17 +119,17 @@ instance (Morphism a, Morphism b) => Morphism (Composition a b) where
 instance Morphism Ident where
 instance Morphism Empty where
 
-data Category a where
- Conjunction :: Category a -> Category a -> Category a
- Disjunction :: Category a -> Category a -> Category a
- Product     :: Category a -> Category a -> Category a
- CoProduct   :: Category a -> Category a -> Category a
- Category    :: Morphism m => { morphism :: Category m, domain :: Category a, codomain :: Category b } -> Category (m,a,b)
- Composition :: (Morphism a, Morphism b) => Category a -> Category b -> Category (Composition a b)
- Symbol      :: KnownSymbol a => Category (Symbol a)
- Ident       :: Category Ident
- Empty       :: Category Empty
- Union       :: Unionable a b => Category a -> Category b -> Category (Union a b)
+data Term a where
+ Conjunction :: Term a -> Term a -> Term a
+ Disjunction :: Term a -> Term a -> Term a
+ Product     :: Term a -> Term a -> Term a
+ CoProduct   :: Term a -> Term a -> Term a
+ Morphism    :: Morphism m => { morphism :: Term m, domain :: Term a, codomain :: Term b } -> Term (m,a,b)
+ Composition :: (Morphism a, Morphism b) => Term a -> Term b -> Term (Composition a b)
+ Symbol      :: KnownSymbol a => Term (Symbol a)
+ Ident       :: Term Ident
+ Empty       :: Term Empty
+ Union       :: Unionable a b => Term a -> Term b -> Term (Union a b)
 
 
 
