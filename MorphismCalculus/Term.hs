@@ -79,11 +79,21 @@ type family IsValidPairOfMorphisms a b c d e f where
   IsValidPairOfMorphisms a b c d e f = 'True
 
 
+test01 :: Category (Ident, Symbol "b", Symbol "b")
+test01 = undefined
+
 test02 :: Category (Union (Symbol "a", Symbol "b", Symbol "b") (Ident, Symbol "b", Symbol "b"))
 test02 = undefined
 
+test04 :: Category (Union (Union (Symbol "a", Symbol "b", Symbol "c") (Ident, Symbol "b", Symbol "b")) (Ident, Symbol "c", Symbol "c"))
+test04 = undefined
+
 test03 :: IsValidCategory a => a -> a
 test03 a = a
+
+test05 = test03 test01
+test06 = test03 test02
+test07 = test03 test04
 
 
 class Morphism a where
