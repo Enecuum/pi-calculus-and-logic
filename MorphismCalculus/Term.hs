@@ -20,6 +20,7 @@ instance   IsValidCategory (Category (Ident,a,a)) where
 instance   IsValidCategory (Category Empty) where
 
 instance ( ( GetListOfObjects (Union a b) `SubstractListSet` GetListOfIdentedObjects (Union a b) ) ~ ()
+         , IsValidSetOfMorphisms a b
          ) => IsValidCategory (Category (Union a b)) where
 
 instance ( IsValidMorphism a b c ~ 'True
@@ -30,6 +31,11 @@ instance ( IsValidSetOfMorphisms c d
          , IsValidSetOfMorphisms a c
          , IsValidSetOfMorphisms a d
          ) => IsValidSetOfMorphisms a (Union c d) where
+
+instance ( IsValidSetOfMorphisms a b
+         , IsValidSetOfMorphisms a c
+         , IsValidSetOfMorphisms b c
+         ) => IsValidSetOfMorphisms (Union a b) c where
 
 data a :. b
 
@@ -75,7 +81,7 @@ type family IsValidMorphism a b c where
 
 type family IsValidPairOfMorphisms a b c d e f where
   IsValidPairOfMorphisms a b c a b c = 'True
-  IsValidPairOfMorphisms a b c a d e = 'False
+  --IsValidPairOfMorphisms a b c a d e = 'False
   IsValidPairOfMorphisms a b c d e f = 'True
 
 
