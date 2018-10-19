@@ -18,6 +18,9 @@ instance Integral LLAlg where
   toInteger (Nat a) = a
 
 instance Num LLAlg where
+  a + b = llAlgNormalize $ Add a b
+  a * b = llAlgNormalize $ Mul a b
+  fromInteger n = Nat n
 
 
 instance Num LLRat where
@@ -29,6 +32,7 @@ instance Num LLRat where
 instance Fractional LLRat where
   LLRat a b / LLRat (Nat 1) (Nat 1) = LLRat b a
 
+llAlgNormalize a = a
 
 llRatReduce a = a
 
