@@ -1,9 +1,9 @@
 module MathForLinearLogic.DisjunctiveRationals where
 
-data LLAlg = Add LLAlg LLAlg | Mul LLAlg LLAlg | Share Int | Use Int | Nat Integer
+data LLAlg = Add LLAlg LLAlg | Mul LLAlg LLAlg | Div LLAlg LLAlg | Share Int | Use Int | Nat Integer
  deriving (Show)
 
-data LLRat = LLRat Integer LLAlg
+data LLRat = LLRat LLAlg LLAlg
  deriving (Show)
 
 instance Eq LLAlg where
@@ -15,16 +15,19 @@ instance Real LLAlg where
 instance Enum LLAlg where
 
 instance Integral LLAlg where
-  toInteger a = 1
+  toInteger (Nat a) = a
 
 instance Num LLAlg where
 
 
 instance Num LLRat where
-  LLRat a b + LLRat c d = llRatReduce $ LLRat (a * toInteger d + c * toInteger b) (b*d)
+  LLRat a b + LLRat c d = llRatReduce $ LLRat (a*d + c*b) (b*d)
   LLRat a b * LLRat c d = llRatReduce $ LLRat (a*c) (b*d)
 
-  fromInteger n = LLRat n (Nat 1)
+  fromInteger n = LLRat (Nat n) (Nat 1)
+
+instance Fractional LLRat where
+  LLRat a b / LLRat (Nat 1) (Nat 1) = LLRat b a
 
 
 llRatReduce a = a
