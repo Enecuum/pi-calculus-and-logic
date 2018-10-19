@@ -1,6 +1,7 @@
 module MathForLinearLogic.DisjunctiveRationals where
 
-data LLAlg = Add LLAlg LLAlg | Mul LLAlg LLAlg | Div LLAlg LLAlg | Inv LLAlg | Neg LLAlg | Share Int | Use Int | Nat Integer | LimToZero | Bottom LLAlg
+data LLAlg = Add LLAlg LLAlg | Mul LLAlg LLAlg | Div LLAlg LLAlg | Inv LLAlg | Neg LLAlg
+           | Share Int | Use Int | Nat Integer | LimToZero | BottomN LLAlg | BottomD LLAlg
  deriving (Show)
 
 data LLRat = LLRat LLAlg LLAlg
@@ -37,8 +38,8 @@ instance Fractional LLRat where
   LLRat a b / LLRat (Nat 1) (Nat 1) = LLRat b a
   a / b = a * (b / 1)
 
--- Multiplicative inverse for linear logic, with ⊥ (Bottom side) special reduction
-inv (LLRat a b) = llRatReduce $ LLRat (Bottom b) a
+-- Multiplicative inverse for linear logic, with ⊥ (Bottom)
+inv (LLRat a b) = llRatReduce $ LLRat (BottomN b) (BottomD a)
 
 a & b = inv ( inv a + inv b )
 
