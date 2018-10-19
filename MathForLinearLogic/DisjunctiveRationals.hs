@@ -35,19 +35,24 @@ instance Num LLRat where
 
 instance Fractional LLRat where
   LLRat a b / LLRat (Nat 1) (Nat 1) = LLRat b a
+  a / b = a * (b / 1)
 
+-- Multiplicative inverse for linear logic, with ⊥ (Bottom side) special reduction
 inv (LLRat a b) = llRatReduce $ LLRat (Bottom b) a
 
 a & b = inv ( inv a + inv b )
 
 a % b = inv ( inv a * inv b )
 
-llAlgNormalize a = a
+llAlgNormalize a = llAlgMultiplicativeNormalForm $ llAlgAdditiveNormalForm a
 
 llRatReduce a = a
 
 
 
+llAlgMultiplicativeNormalForm a = a
+
+llAlgAdditiveNormalForm a = a
 
 
 
