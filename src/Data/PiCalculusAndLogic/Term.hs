@@ -19,6 +19,9 @@ data Term = Empt | Fail
           | COMM [Term] -- listen quests, choose offers
           | ORDR [Term] -- create binds use binds, check order
 
+          | Ordr [Term]
+          | Comm [Term]
+
           -- Operators for exponentials
           | SERV  Term  -- term can be removed or duplicated
           | LOG2  Term  -- not remove term only if place with it reduced 2^n times

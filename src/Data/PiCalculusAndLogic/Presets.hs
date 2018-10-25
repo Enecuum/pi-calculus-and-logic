@@ -8,6 +8,7 @@ import Data.PiCalculusAndLogic.Tools
 import Prelude hiding ((<>))
 import Data.PiCalculusAndLogic.Expr
 
+{-
 testLambda = 
   Serv ( Wait "myLambdaServer" "lambdaChan"
     <> Serv ( Wait "lambdaChan" "arg1"
@@ -42,4 +43,5 @@ mulTokensServer =
         *| Serv ( Log2 ( Wait "logt" 2 ) <> Send "args" 1 )
          )
        )
+-}
 
