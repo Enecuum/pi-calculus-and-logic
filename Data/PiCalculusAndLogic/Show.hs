@@ -19,8 +19,8 @@ instance Show Term where
   show (Wait c x) = show c ++ "(" ++ show x ++ ")"
   show (Send c 1) = show c ++ "<>"
   show (Send c y) = show c ++ "<" ++ show y ++ ">"
-  show (Comm a) = foldr (\a b -> show a ++ "|" ++ b) (show $ head a) (tail a)
-  show (Ordr a) = foldl (\b a -> oqShow a ++ "." ++ b) (oqShow $ last a) (reverse $ init a)
+  --show (Comm a) = foldr (\a b -> show a ++ "|" ++ b) (show $ head a) (tail a)
+  --show (Ordr a) = foldl (\b a -> oqShow a ++ "." ++ b) (oqShow $ last a) (reverse $ init a)
   show (Serv a) = "!" ++ sqShow a
   show (OptF a) = "?" ++ sqShow a
   show (OptW c) = show c ++ "(?)"
