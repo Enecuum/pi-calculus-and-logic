@@ -2,6 +2,7 @@
 
 module Data.PiCalculusAndLogic.Show where
 
+{-
 import Data.Word
 import Data.List
 import Data.String
@@ -13,7 +14,9 @@ import Data.IORef
 import Data.SymbolForChan
 import Data.PiCalculusAndLogic.Term
 import Data.PiCalculusAndLogic.Tools
+-}
 
+{-
 instance Show Term where
   show (Wait c 2) = show c ++ "()"
   show (Wait c x) = show c ++ "(" ++ show x ++ ")"
@@ -34,6 +37,7 @@ oqShow a = show a
 sqShow a@(Comm _) = "(" ++ show a ++ ")"
 sqShow a@(Ordr _) = "(" ++ show a ++ ")"
 sqShow a = show a
+-}
 
 
 
