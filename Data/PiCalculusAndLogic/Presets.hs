@@ -6,6 +6,7 @@ import Data.SymbolForChan
 import Data.PiCalculusAndLogic.Term
 import Data.PiCalculusAndLogic.Tools
 
+{-
 testLambda = 
   Serv ( Wait "myLambdaServer" "lambdaChan"
     <> Serv ( Wait "lambdaChan" "arg1"
@@ -40,4 +41,5 @@ mulTokensServer =
         *| Serv ( Log2 ( Wait "logt" 2 ) <> Send "args" 1 )
          )
        )
+-}
 
