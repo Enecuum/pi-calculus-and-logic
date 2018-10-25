@@ -3,6 +3,7 @@ module PiCalculus.Parser where
 import PiCalculus.Expr
 import Catatoroid.Pattern
 
+{-
 pattern = do
   a <- letter
   b <- many alphaNum
@@ -24,6 +25,7 @@ send = do
   sps
   c <- process
   return $ Send a b c
+-}
   
 
 
