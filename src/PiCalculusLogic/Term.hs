@@ -24,7 +24,7 @@ identities =
  [ ( Indet 10 `Mult` Indet 20, Indet 20 `Mult` Indet 10 )
  , ( Indet 10 `Case` Indet 20, Inv (Inv (Indet 10) `Plus` Inv (Indet 20)) )
  , ( Indet 10 `Isol` Indet 20, Exp (Log (Indet 10) `Case` Log (Indet 20)) )
- , Const "Top", Nat 0 
+ -- , Const "Top", Nat 0 
  ]
 
 --a & b = Inve (Inve a `Plus` Inve b)
@@ -47,6 +47,6 @@ a `Isol` Inve a = Infinity
 
 -}
 
-offer  a b = Inve (Recv a b)
-accept a b = Inve (Send a b)
+offer  a b = Inv (Recv a b)
+accept a b = Inv (Send a b)
 
