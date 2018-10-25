@@ -2,7 +2,7 @@
 
 module SequentCalculus.ClassicLogic where
 
-import SequentCalculus.Types
+import SequentCalculus.Types hiding (Indet)
 
 data Classic a where
   Elem  :: a                      -> Classic a
