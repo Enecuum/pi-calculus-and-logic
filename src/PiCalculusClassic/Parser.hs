@@ -3,11 +3,12 @@ module PiCalculusClassic.Parser where
 import PiCalculusClassic.Expr
 import Catarotoid.Pattern
 
+{-
 pattern = do
   a <- letter
   b <- many alphaNum
   return $ [ConstName "PiCalculus", ConstName "Channel", ConstName "Normal", ConstName (a:b)]
-  
+
 
 send :: Parser Expr
 send = do
@@ -24,7 +25,4 @@ send = do
   sps
   c <- process
   return $ Send a b c
-  
-
-
-
+-}
