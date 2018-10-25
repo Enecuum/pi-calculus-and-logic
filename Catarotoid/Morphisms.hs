@@ -10,24 +10,24 @@ import Data.Tuple
 
 import Catarotoid.Term
 
--- predicate -> termAlgebraM -> originalTerm -> m transformatedTerm
-termCataM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
+-- predicate -> termAlgebraM -> original(Term z) -> m transformated(Term z)
+termCataM :: Monad m => ((Term z) -> Bool) -> ((Term z) -> m (Term z)) -> (Term z) -> m (Term z)
 termCataM p f a = termMapM p (termCataM p f) a >>= f
 
--- predicate -> termCoAlgebraM -> originalTerm -> m transformatedTerm
-termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
+-- predicate -> termCoAlgebraM -> original(Term z) -> m transformated(Term z)
+termAnaM :: Monad m => ((Term z) -> Bool) -> ((Term z) -> m (Term z)) -> (Term z) -> m (Term z)
 termAnaM p f a = f a >>= termMapM p (termAnaM p f)
 
--- predicate -> termAlgebraM -> termCoAlgebraM -> originalTerm -> m transformatedTerm
-termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
+-- predicate -> termAlgebraM -> termCoAlgebraM -> original(Term z) -> m transformated(Term z)
+termHyloM :: Monad m => ((Term z) -> Bool) -> ((Term z) -> m (Term z)) -> ((Term z) -> m (Term z)) -> (Term z) -> m (Term z)
 termHyloM p f g a = g a >>= termMapM p (termHyloM p f g) >>= f
 
--- predicate -> termGAlgebraM -> originalTerm -> m transformatedTerm
-termParaM :: Monad m => (Term -> Bool) -> ((Term, Term) -> m Term) -> Term -> m Term
+-- predicate -> termGAlgebraM -> original(Term z) -> m transformated(Term z)
+termParaM :: Monad m => ((Term z) -> Bool) -> (((Term z), (Term z)) -> m (Term z)) -> (Term z) -> m (Term z)
 termParaM p f a = termMapM p (termParaM p f) a >>= curry f a
 
--- predicate -> termGCoAlgebraM -> originalTerm -> m tranformatedTerm
-termApoM :: Monad m => (Term -> Bool) -> (Term -> m (Either Term Term)) -> Term -> m Term
+-- predicate -> termGCoAlgebraM -> original(Term z) -> m tranformated(Term z)
+termApoM :: Monad m => ((Term z) -> Bool) -> ((Term z) -> m (Either (Term z) (Term z))) -> (Term z) -> m (Term z)
 termApoM p f a = do
   b <- f a
   case b of

@@ -12,12 +12,12 @@ import Catarotoid.Term
 import Catarotoid.Morphisms
 import Catarotoid.MiscTools
 
-isFocusExistInTermOp :: Term -> Bool
+isFocusExistInTermOp :: Term z -> Bool
 isFocusExistInTermOp a = snd $ runState (termMapM p f a) False
  where
   p (Focus _) = False
   p        _  = True
-  f :: Term -> State Bool Term
+  f :: Term z -> State Bool (Term z)
   f o@(Focus _) = put True >> return o
   f o           =             return o
 
@@ -31,7 +31,7 @@ focusAll a = termCata p f a
 class FocusUp a where
   focusUp :: a -> a
 
-instance FocusUp Term where
+instance FocusUp (Term z) where
   focusUp = termCata (const True) f
    where
     f a | isFocusExistInTermOp a = Focus a

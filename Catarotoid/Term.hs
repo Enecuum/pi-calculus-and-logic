@@ -31,6 +31,7 @@ data Term a
 
  | Share UniqueShare
  | Focus (Term a)
+ | MROOT
 
  | Nat Integer
 
