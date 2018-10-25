@@ -1,7 +1,7 @@
 module PiCalculusClassic.Parser where
 
-import PiCalculus.Expr
-import Catatoroid.Pattern
+import PiCalculusClassic.Expr
+import Catarotoid.Pattern
 
 pattern = do
   a <- letter
