@@ -1,4 +1,4 @@
-module PiCalculus.Expr where
+module PiCalculusClassic.Expr where
 
 import Catarotoid.Pattern
 

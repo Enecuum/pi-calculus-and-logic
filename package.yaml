@@ -24,6 +24,12 @@ dependencies:
 - stm
 - mtl
 - random
+- primes
+- fixed-vector
+- arithmoi
+- parsec
+- hashable
+- containers
 
 library:
   source-dirs: src

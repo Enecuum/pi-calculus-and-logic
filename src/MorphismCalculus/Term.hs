@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleInstances, KindSignatures, DataKinds, FlexibleContexts, UndecidableInstances, FunctionalDependencies, TypeFamilies, TypeOperators #-}
 
-module MorphismCalculus where
+module MorphismCalculus.Term where
 
 import GHC.TypeLits hiding (Symbol)
 import qualified GHC.TypeLits as T

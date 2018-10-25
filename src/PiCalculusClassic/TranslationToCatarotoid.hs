@@ -1,4 +1,4 @@
-module PiCalculus.TranslationToCatarotoid where
+module PiCalculusClassic.TranslationToCatarotoid where
 
 
 {-

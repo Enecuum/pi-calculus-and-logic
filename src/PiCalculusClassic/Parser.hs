@@ -1,4 +1,4 @@
-module PiCalculus.Parser where
+module PiCalculusClassic.Parser where
 
 import PiCalculus.Expr
 import Catatoroid.Pattern
