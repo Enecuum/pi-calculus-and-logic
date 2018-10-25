@@ -130,7 +130,7 @@ data Term a where
  Ident       :: Term Ident
  Empty       :: Term Empty
  Union       :: Unionable a b => Term a -> Term b -> Term (Union a b)
- Tagged      :: SetOfTags b => Term a -> Term b -> Term (Tagged a b)
+ -- Tagged      :: SetOfTags b => Term a -> Term b -> Term (Tagged a b)
 
 
 
