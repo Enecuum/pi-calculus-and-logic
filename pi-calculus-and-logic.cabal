@@ -1,0 +1,66 @@
+-- This file has been generated from package.yaml by hpack version 0.28.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 17017cb76e3a546f273c2d619660cb4ca12ce4242eac6e7d3e358d8207a01a7b
+
+name:           pi-calculus-and-logic
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/ksenia portu/pi-calculus-and-logic#readme>
+homepage:       https://github.com//pi-calculus-and-logic#readme
+bug-reports:    https://github.com//pi-calculus-and-logic/issues
+copyright:      2018  Enecuum
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com//pi-calculus-and-logic
+
+library
+  other-modules:
+      Paths_pi_calculus_and_logic
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , mtl
+    , random
+    , stm
+  default-language: Haskell2010
+
+executable pi-calculus-and-logic-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_pi_calculus_and_logic
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , mtl
+    , pi-calculus-and-logic
+    , random
+    , stm
+  default-language: Haskell2010
+
+test-suite pi-calculus-and-logic-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_pi_calculus_and_logic
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , mtl
+    , pi-calculus-and-logic
+    , random
+    , stm
+  default-language: Haskell2010
