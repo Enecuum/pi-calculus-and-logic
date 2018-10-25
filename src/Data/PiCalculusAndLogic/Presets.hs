@@ -3,8 +3,10 @@
 module Data.PiCalculusAndLogic.Presets where
 
 import Data.SymbolForChan
-import Data.PiCalculusAndLogic.Term
+import Data.PiCalculusAndLogic.Term hiding (Fail)
 import Data.PiCalculusAndLogic.Tools
+import Prelude hiding ((<>))
+import Data.PiCalculusAndLogic.Expr
 
 testLambda = 
   Serv ( Wait "myLambdaServer" "lambdaChan"

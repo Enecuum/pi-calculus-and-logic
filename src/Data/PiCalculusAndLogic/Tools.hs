@@ -12,6 +12,7 @@ import System.IO.Unsafe
 import Data.IORef
 import Data.SymbolForChan
 import Data.PiCalculusAndLogic.Term
+import Data.PiCalculusAndLogic.Expr
 
 (Ordr a) <> (Ordr b) = Ordr (a++b)
 (Ordr a) <>       b  = Ordr (a++[b])
