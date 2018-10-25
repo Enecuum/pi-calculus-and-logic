@@ -1,7 +1,7 @@
-module PiCalculus.Parser where
+module PiCalculusClassic.Parser where
 
-import PiCalculus.Expr
-import Catatoroid.Pattern
+--import PiCalculus.Expr
+--import Catatoroid.Pattern
 
 {-
 pattern = do
