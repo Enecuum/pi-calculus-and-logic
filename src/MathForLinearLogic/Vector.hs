@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances #-}
+{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists #-}
 
 module MathForLinearLogic.Vector where
 
@@ -15,6 +15,7 @@ import Data.Functor
 import Data.Foldable
 import Data.Zip
 import Data.Default.Class
+import qualified GHC.Exts as E
 
 test0001 :: Vec 'GT 4 Int
 test0001 = 1 `Cons` 2 `Cons` 3 `Cons` 4 `Cons` Nil
@@ -39,6 +40,29 @@ infixr 8 `Cons`
 data Vec (a :: Ordering) (b :: Nat) c where
   Nil  :: Vec 'EQ 0 b
   Cons :: KnownNat b => c -> Vec (CmpNat (b-1) 0) (b-1) c -> Vec 'GT b c
+
+instance E.IsList (Vec 'EQ 0 a) where
+  type Item (Vec 'EQ 0 a) = a
+  toList _ = []
+  fromList [] = Nil
+  fromListN 0 [] = Nil
+
+instance ( KnownNat n, CmpNat n 0 ~ 'GT
+         , E.Item (Vec (CmpNat (n - 1) 0) (n - 1) a) ~ a
+         , E.IsList (Vec (CmpNat (n - 1) 0) (n - 1) a)
+         , Foldable (Vec (CmpNat (n - 1) 0) (n - 1)) ) => E.IsList (Vec 'GT n a) where
+  type Item (Vec 'GT n a) = a
+  toList a = toList a
+  fromList a = E.fromListN (length a) a
+  fromListN n (x:xs) | n == v = a
+                       | otherwise = error "invalid length"
+    where
+     a = Cons x (E.fromListN (n-1) xs)
+     v :: Int
+     v = fromInteger $ natVal $ f a
+     f :: Vec 'GT n a -> Proxy n
+     f = undefined
+  
 
 instance Functor (Vec 'EQ 0) where
   fmap f Nil = Nil
