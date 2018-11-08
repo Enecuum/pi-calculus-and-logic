@@ -1,49 +1,56 @@
-{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts #-}
+{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances #-}
 
 module MathForLinearLogic.Vector where
 
+import Prelude hiding (zip)
 import System.Random
 import Control.Monad
-import Data.List
+import Data.List hiding (zip)
 import Math.NumberTheory.Primes.Factorisation
 import System.Random.Shuffle
 import Math.NumberTheory.Primes.Testing
 import GHC.TypeLits
 import Data.Proxy
 import Data.Functor
+import Data.Foldable
+import Data.Zip
 
+infixr 8 `Cons`
 
-data VecNil a = VecNil
+data Vec (a :: Ordering) (b :: Nat) c where
+  Nil  :: Vec 'EQ 0 b
+  Cons :: KnownNat b => c -> Vec (CmpNat (b-1) 0) (b-1) c -> Vec 'GT b c
 
-data a :. b = a :. b
+instance Functor (Vec 'EQ 0) where
+  fmap f Nil = Nil
 
-infixr 8 :.
+instance Functor (Vec (CmpNat (n-1) 0) (n-1)) => Functor (Vec 'GT n) where
+  fmap f (Cons a b) = Cons (f a) (fmap f b)
 
-type family Vec (a :: Nat) b where
-  Vec 0 a = ()
-  Vec 1 a = a :. ()
-  Vec n a = a :. Vec (n-1) a
+instance Foldable (Vec 'EQ 0) where
+  foldr f b Nil = b
 
-class VecToList a b where
-  vecToList :: a -> [b]
+instance Foldable (Vec (CmpNat (n-1) 0) (n-1)) => Foldable (Vec 'GT n) where
+  foldr f b (Cons a c) = f a (foldr f b c)
 
-instance VecToList () b where
-  vecToList () = []
+instance Zip (Vec 'EQ 0) where
+  zip Nil Nil = Nil
 
-instance VecToList b a => VecToList (a :. b) a where
-  vecToList (a :. b) = a : vecToList b
+instance Zip (Vec (CmpNat (n-1) 0) (n-1)) => Zip (Vec 'GT n) where
+  zip (Cons a b) (Cons c d) = Cons (a,c) (zip b d)
 
-instance (VecToList b a, VecToList (a :. b) a, Show a) => Show (a :. b) where
-  show (a :. b) = show ( a : vecToList b )
+test0001 :: Vec 'GT 4 Int
+test0001 = 1 `Cons` 2 `Cons` 3 `Cons` 4 `Cons` Nil
 
-vecSum a = sum $ vecToList a
+instance (Foldable (Vec a b), Show c) => Show (Vec a b c) where
+  show a = show $ foldr (:) [] a
 
-instance Num () where
-  () + () = ()
-  () * () = ()
+instance (Functor (Vec a b), Zip (Vec a b), Num c) => Num (Vec a b c) where
+  a + b = fmap (uncurry (+)) $ zip a b
+  a * b = fmap (uncurry (*)) $ zip a b
+  abs a = fmap abs a
+  signum a = fmap signum a
+  negate a = fmap negate a
 
-instance (Num a, Num b) => Num (a :. b) where
-  (a :. b) + (c :. d) = (a+c) :. (b+d)
-  (a :. b) * (c :. d) = (a*c) :. (b*d)
 
 

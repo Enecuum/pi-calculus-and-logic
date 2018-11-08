@@ -30,6 +30,7 @@ dependencies:
 - parsec
 - hashable
 - containers
+# TypeCompose >= 0.9.14
 
 library:
   source-dirs: src
