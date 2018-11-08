@@ -87,19 +87,13 @@ vecHead (Cons a _) = a
 vecTail :: Vec 'GT n c -> Vec (CmpNat (n-1) 0) (n-1) c
 vecTail (Cons _ a) = a
 
-class VecJoin a b d e c where
-  vecJoin :: Vec a b c -> Vec d e c -> Vec (CmpNat (b+e) 0) (b+e) c
+class VecJoin a b c d where
+  vecJoin :: (CmpNat e 0 ~ 'GT) => Vec a b d -> Vec 'GT c d -> Vec 'GT (b+c) d
 
-instance VecJoin 'EQ 0 'EQ 0 c where
-  vecJoin _ _ = Nil
-
-instance (CmpNat e 0 ~ 'GT) => VecJoin 'EQ 0 'GT e c where
+instance VecJoin 'EQ 0 c d where
   vecJoin _ a = a
 
-instance (CmpNat b 0 ~ 'GT) => VecJoin 'GT b 'EQ 0 c where
-  vecJoin a _ = a
-
-instance VecJoin (CmpNat (b-1) 0) (b-1) 'GT e c => VecJoin 'GT b 'GT e c where
+instance VecJoin (CmpNat (b-1) 0) (b-1) c d => VecJoin 'GT b c d where
   vecJoin (Cons a b) c = Cons a $ vecJoin b c
 
 class VecReverse a b c where
