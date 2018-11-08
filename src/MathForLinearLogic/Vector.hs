@@ -93,7 +93,7 @@ class VecJoin a b c d where
 instance VecJoin 'EQ 0 c d where
   vecJoin _ a = a
 
-instance VecJoin (CmpNat (b-1) 0) (b-1) c d => VecJoin 'GT b c d where
+instance (VecJoin (CmpNat (b-1) 0) (b-1) c d, CmpNat ((b + c) - 1) 0 ~ 'GT, ((b - 1) + c) ~ ((b + c) - 1), KnownNat (b+c)) => VecJoin 'GT b c d where
   vecJoin (Cons a b) c = Cons a $ vecJoin b c
 
 class VecReverse a b c where
