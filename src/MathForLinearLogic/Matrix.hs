@@ -44,6 +44,10 @@ test02 = undefined
 test03 :: Vec 4 Double
 test03 = 1 :. 2 :. 3 :. 4 :. ()
 
+vecMulMat :: (KnownNat a, KnownNat b) => Vec a Integer -> Matrix a b -> Matrix a b
+vecMulMat = undefined
+
+
 class VecToList a b where
   vecToList :: a -> [b]
 
@@ -71,8 +75,24 @@ testMatrix = Matrix (  (1 :. 2 :. ())  :.  (3 :. 4 :. ()) :. () )
 testMatrix02 :: Matrix 3 127
 testMatrix02 = Matrix (  (1 :. 2 :. 5 :. ())  :.  (3 :. 4 :. 6 :. ()) :. (7 :. 8 :. 9 :. ()) :. () )
 
+
+
+vecSum a = sum $ vecToList a
+
 instance (KnownNat a, KnownNat b, VecToList (Vec a Integer) Integer, VecToList (Vec a (Vec a Integer)) (Vec a Integer)) => Show (Matrix a b) where
   show a = show $ toDataMatrix a
+
+instance Num () where
+  () + () = ()
+  () * () = ()
+
+instance (Num a, Num b) => Num (a :. b) where
+  (a :. b) + (c :. d) = (a+c) :. (b+d)
+  (a :. b) * (c :. d) = (a*c) :. (b*d)
+
+instance (KnownNat a, KnownNat b, Num (Vec a Integer), Num (Vec a (Vec a Integer))) => Num (Matrix a b) where
+  Matrix a + Matrix b = Matrix (a+b)
+
 
 {-
 
