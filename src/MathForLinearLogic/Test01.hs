@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists, TemplateHaskell #-}
+{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists, TemplateHaskell, RankNTypes #-}
 
 module MathForLinearLogic.Test01 where
 
@@ -21,9 +21,17 @@ import Tools.FindCorrectTypesAtCompileTime
 import Language.Haskell.TH.Syntax
 import MathForLinearLogic.Vector
 
-test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
+test0008 = $(lift ( [1,2,3,4,5] :: Vec 'EQ 0 Double ) )
 
-test0009 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
+test0009 = $(lift ( [1,2,3,4,5,6] :: Vec 'EQ 0 Int ) )
+
+test0010 = $(lift ( [1,2,3,4,5,6,7 :: Integer] :: Vec 'EQ 0 Integer ) )
+
+test0011 = $(lift ( [] :: Vec 'EQ 0 Integer ) )
+
+--test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
+
+--test0009 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
 
 --test0007 = [1,2,3,4,5] :: Vec 'GT $(detectNat) Double
 

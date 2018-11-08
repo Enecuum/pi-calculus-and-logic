@@ -20,12 +20,39 @@ import qualified GHC.Exts as E
 import Tools.FindCorrectTypesAtCompileTime
 import Language.Haskell.TH.Syntax
 
+-- type Vector = forall a . Vec 'EQ 0 a
+
+
+class Snocable (a :: Ordering) (b :: Nat) where
+
+instance Snocable 'EQ 0 where
+instance Snocable 'LT 1 where
+
 data Vec (a :: Ordering) (b :: Nat) c where
   Nil  :: Vec 'EQ 0 b
   Cons :: KnownNat b => c -> Vec (CmpNat (b-1) 0) (b-1) c -> Vec 'GT b c
+  Snoc :: Snocable b c => Vec b c a -> a -> Vec 'LT 1 a
 
 instance Lift (Vec 'EQ 0 a) where
   lift _ = return $ ConE $ mkName "Nil"
+
+{-
+instance {-# OVERLAPPABLE #-} (Snocable b c, Lift a) => Lift (Vec b c a) where
+  lift o@Nil = lift (f o)
+   where
+    f :: Vec b c a -> Vec 'EQ 0 a
+    f _ = Nil
+  lift o@(Snoc _ _) = lift (f o)
+   where
+    f :: Vec b c a -> Vec 'LT 1 a
+    f (Snoc a b) = Snoc a b
+-}
+
+instance (Lift a) => Lift (Vec 'LT 1 a) where
+  lift (Snoc a b) = do
+    c <- lift a
+    d <- lift b
+    return $ (VarE $ mkName "vecJoin") `AppE` c `AppE` ( (ConE $ mkName "Cons") `AppE` d `AppE` (ConE $ mkName "Nil") )
 
 instance (Lift (Vec (CmpNat (n-1) 0) (n-1) a), Lift a) => Lift (Vec 'GT n a) where
   lift o@(Cons a b) = do
@@ -33,18 +60,8 @@ instance (Lift (Vec (CmpNat (n-1) 0) (n-1) a), Lift a) => Lift (Vec 'GT n a) whe
      d <- lift b
      return $ (ConE $ mkName "Cons") `AppE` c `AppE` d
 
-{-
-   where
-    f :: Vec 'GT n a -> Proxy n
-    f = undefined
-    v :: Integer
-    v = natVal $ f o
--}
-
 infixr 8 `Cons`
-
-
-
+infixl 8 `Snoc`
 
 test0001 :: Vec 'GT 4 Int
 test0001 = 1 `Cons` 2 `Cons` 3 `Cons` 4 `Cons` Nil
@@ -66,12 +83,16 @@ test0005 = vecTranspose test0004
 
 test0006 = [1,2,3,4,5] :: Vec 'GT 5 Double
 
-
 instance E.IsList (Vec 'EQ 0 a) where
   type Item (Vec 'EQ 0 a) = a
   toList _ = []
   fromList [] = Nil
   fromListN 0 [] = Nil
+
+instance E.IsList (Vec 'LT 1 a) where
+  type Item (Vec 'LT 1 a) = a
+  fromList [] = error "only non empty lists"
+  fromList (x:xs) = foldl Snoc (Snoc Nil x) xs
 
 instance ( KnownNat n, CmpNat n 0 ~ 'GT
          , E.Item (Vec (CmpNat (n - 1) 0) (n - 1) a) ~ a
@@ -81,7 +102,7 @@ instance ( KnownNat n, CmpNat n 0 ~ 'GT
   toList a = toList a
   fromList a = E.fromListN (length a) a
   fromListN n (x:xs) | n == v = a
-                       | otherwise = error "invalid length"
+                     | otherwise = error "invalid length"
     where
      a = Cons x (E.fromListN (n-1) xs)
      v :: Int
@@ -96,9 +117,15 @@ instance Functor (Vec 'EQ 0) where
 instance Functor (Vec (CmpNat (n-1) 0) (n-1)) => Functor (Vec 'GT n) where
   fmap f (Cons a b) = Cons (f a) (fmap f b)
 
+useLiftWTH = "use lift function with template haskell"
+
 instance Foldable (Vec 'EQ 0) where
+
   foldr f b Nil = b
+  --foldr _ _ _ = error useLiftWTH
+
   foldl f b Nil = b
+  --foldl _ _ _ = error useLiftWTH
 
 instance Foldable (Vec (CmpNat (n-1) 0) (n-1)) => Foldable (Vec 'GT n) where
   foldr f b (Cons a c) = f a (foldr f b c)
