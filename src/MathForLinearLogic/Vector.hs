@@ -91,7 +91,7 @@ class VecTranspose a b c d e where
 instance VecTranspose 'GT b 'EQ 0 e where
   vecTranspose _ = Nil
 
-instance (KnownNat b, KnownNat (d-1), VecTranspose 'GT b (CmpNat (d-1) 0) (d-1) e) => VecTranspose 'GT b 'GT d e where
+instance (KnownNat (d-1), VecTranspose 'GT b (CmpNat (d-1) 0) (d-1) e) => VecTranspose 'GT b 'GT d e where
   vecTranspose a = Cons (fmap vecHead a) (vecTranspose $ fmap vecTail a)
 
 
