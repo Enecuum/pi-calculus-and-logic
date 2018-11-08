@@ -21,9 +21,13 @@ import Tools.FindCorrectTypesAtCompileTime
 import Language.Haskell.TH.Syntax
 import MathForLinearLogic.Vector
 
+test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
+
+test0009 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
+
 --test0007 = [1,2,3,4,5] :: Vec 'GT $(detectNat) Double
 
-test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
+--test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
 
 --test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
 
