@@ -23,15 +23,15 @@ import Language.Haskell.TH.Syntax
 -- type Vector = forall a . Vec 'EQ 0 a
 
 
-class Snocable (a :: Ordering) (b :: Nat) where
-
-instance Snocable 'EQ 0 where
-instance Snocable 'LT 1 where
+type family IsSnocArg (a :: Ordering) (b :: Nat) where
+  IsSnocArg 'EQ 0 = 'True
+  IsSnocArg 'LT 1 = 'True
+  IsSnocArg  a  b = 'False
 
 data Vec (a :: Ordering) (b :: Nat) c where
   Nil  :: Vec 'EQ 0 b
   Cons :: KnownNat b => c -> Vec (CmpNat (b-1) 0) (b-1) c -> Vec 'GT b c
-  Snoc :: Snocable b c => Vec b c a -> a -> Vec 'LT 1 a
+  Snoc :: (IsSnocArg b c ~ 'True) => Vec b c a -> a -> Vec 'LT 1 a
 
 instance Lift (Vec 'EQ 0 a) where
   lift _ = return $ ConE $ mkName "Nil"
