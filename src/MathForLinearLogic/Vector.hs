@@ -16,6 +16,24 @@ import Data.Foldable
 import Data.Zip
 import Data.Default.Class
 
+test0001 :: Vec 'GT 4 Int
+test0001 = 1 `Cons` 2 `Cons` 3 `Cons` 4 `Cons` Nil
+
+test0002 :: Vec 'GT 4 ()
+test0002 = def
+
+test0003 :: Vec 'GT 7 Int
+test0003 = fromInteger 3
+
+test0004 :: Vec 'GT 4 (Vec 'GT 3 Int)
+test0004 = (1 `Cons` 2 `Cons` 3 `Cons` Nil)
+    `Cons` (4 `Cons` 5 `Cons` 6 `Cons` Nil)
+    `Cons` (7 `Cons` 8 `Cons` 9 `Cons` Nil)
+    `Cons` (3 `Cons` 3 `Cons` 3 `Cons` Nil)
+    `Cons` Nil
+
+test0005 = vecTranspose test0004
+
 infixr 8 `Cons`
 
 data Vec (a :: Ordering) (b :: Nat) c where
@@ -46,15 +64,6 @@ instance Default (Vec 'EQ 0 a) where
 instance (KnownNat n, Default (Vec (CmpNat (n-1) 0) (n-1) a), Default a) => Default (Vec 'GT n a) where
   def = Cons def def
 
-test0001 :: Vec 'GT 4 Int
-test0001 = 1 `Cons` 2 `Cons` 3 `Cons` 4 `Cons` Nil
-
-test0002 :: Vec 'GT 4 ()
-test0002 = def
-
-test0003 :: Vec 'GT 7 Int
-test0003 = fromInteger 3
-
 instance (Foldable (Vec a b), Show c) => Show (Vec a b c) where
   show a = show $ foldr (:) [] a
 
@@ -70,8 +79,21 @@ instance (Functor (Vec a b), Zip (Vec a b), Default (Vec a b ()), Num c) => Num 
     f _ = def
     a = fmap (const $ fromInteger n) $ f a
 
---transpose :: (KnownNat b, KnownNat d) => Vec a b (Vec c d e) -> Vec c d (a b e)
---transpose = undefined
+vecHead :: Vec 'GT b c -> c
+vecHead (Cons a _) = a
+
+vecTail :: Vec 'GT n c -> Vec (CmpNat (n-1) 0) (n-1) c
+vecTail (Cons _ a) = a
+
+class VecTranspose a b c d e where
+  vecTranspose :: (KnownNat d, Functor (Vec a b)) => Vec a b (Vec c d e) -> Vec c d (Vec a b e)
+
+instance VecTranspose 'GT b 'EQ 0 e where
+  vecTranspose _ = Nil
+
+instance (KnownNat b, KnownNat (d-1), VecTranspose 'GT b (CmpNat (d-1) 0) (d-1) e) => VecTranspose 'GT b 'GT d e where
+  vecTranspose a = Cons (fmap vecHead a) (vecTranspose $ fmap vecTail a)
+
 
 
 
