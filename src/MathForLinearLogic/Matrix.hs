@@ -12,6 +12,7 @@ import System.Random.Shuffle
 import Math.NumberTheory.Primes.Testing
 import GHC.TypeLits
 import Data.Proxy
+import Data.Functor
 
 type Matrix7det32type01 = Matrix 7 4194476831
 
