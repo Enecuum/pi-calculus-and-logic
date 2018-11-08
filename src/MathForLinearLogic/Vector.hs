@@ -20,9 +20,6 @@ import qualified GHC.Exts as E
 import Tools.FindCorrectTypesAtCompileTime
 import Language.Haskell.TH.Syntax
 
--- type Vector = forall a . Vec 'EQ 0 a
-
-
 type family IsSnocArg (a :: Ordering) (b :: Nat) where
   IsSnocArg 'EQ 0 = 'True
   IsSnocArg 'LT 1 = 'True
@@ -36,20 +33,14 @@ data Vec (a :: Ordering) (b :: Nat) c where
 instance Lift (Vec 'EQ 0 a) where
   lift _ = return $ ConE $ mkName "Nil"
 
-{-
-instance {-# OVERLAPPABLE #-} (Snocable b c, Lift a) => Lift (Vec b c a) where
-  lift o@Nil = lift (f o)
-   where
-    f :: Vec b c a -> Vec 'EQ 0 a
-    f _ = Nil
-  lift o@(Snoc _ _) = lift (f o)
-   where
-    f :: Vec b c a -> Vec 'LT 1 a
-    f (Snoc a b) = Snoc a b
--}
-
 instance (Lift a) => Lift (Vec 'LT 1 a) where
-  lift (Snoc a b) = do
+
+  lift (Snoc a@(Nil) b) = do
+    c <- lift a
+    d <- lift b
+    return $ (VarE $ mkName "vecJoin") `AppE` c `AppE` ( (ConE $ mkName "Cons") `AppE` d `AppE` (ConE $ mkName "Nil") )
+
+  lift (Snoc a@(Snoc _ _) b) = do
     c <- lift a
     d <- lift b
     return $ (VarE $ mkName "vecJoin") `AppE` c `AppE` ( (ConE $ mkName "Cons") `AppE` d `AppE` (ConE $ mkName "Nil") )
@@ -91,6 +82,7 @@ instance E.IsList (Vec 'EQ 0 a) where
 
 instance E.IsList (Vec 'LT 1 a) where
   type Item (Vec 'LT 1 a) = a
+  toList _ = error useLiftWTH
   fromList [] = error "only non empty lists"
   fromList (x:xs) = foldl Snoc (Snoc Nil x) xs
 
@@ -117,15 +109,11 @@ instance Functor (Vec 'EQ 0) where
 instance Functor (Vec (CmpNat (n-1) 0) (n-1)) => Functor (Vec 'GT n) where
   fmap f (Cons a b) = Cons (f a) (fmap f b)
 
-useLiftWTH = "use lift function with template haskell"
+useLiftWTH = "only useful with lift function with template haskell"
 
 instance Foldable (Vec 'EQ 0) where
-
   foldr f b Nil = b
-  --foldr _ _ _ = error useLiftWTH
-
   foldl f b Nil = b
-  --foldl _ _ _ = error useLiftWTH
 
 instance Foldable (Vec (CmpNat (n-1) 0) (n-1)) => Foldable (Vec 'GT n) where
   foldr f b (Cons a c) = f a (foldr f b c)
