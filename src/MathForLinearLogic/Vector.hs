@@ -70,6 +70,9 @@ instance (Functor (Vec a b), Zip (Vec a b), Default (Vec a b ()), Num c) => Num 
     f _ = def
     a = fmap (const $ fromInteger n) $ f a
 
+--transpose :: (KnownNat b, KnownNat d) => Vec a b (Vec c d e) -> Vec c d (a b e)
+--transpose = undefined
+
 
 
 
