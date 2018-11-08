@@ -88,7 +88,7 @@ vecTail :: Vec 'GT n c -> Vec (CmpNat (n-1) 0) (n-1) c
 vecTail (Cons _ a) = a
 
 class VecJoin a b c d where
-  vecJoin :: (CmpNat e 0 ~ 'GT) => Vec a b d -> Vec 'GT c d -> Vec 'GT (b+c) d
+  vecJoin :: (CmpNat c 0 ~ 'GT) => Vec a b d -> Vec 'GT c d -> Vec 'GT (b+c) d
 
 instance VecJoin 'EQ 0 c d where
   vecJoin _ a = a
