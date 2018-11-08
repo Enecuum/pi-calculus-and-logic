@@ -48,9 +48,11 @@ instance Functor (Vec (CmpNat (n-1) 0) (n-1)) => Functor (Vec 'GT n) where
 
 instance Foldable (Vec 'EQ 0) where
   foldr f b Nil = b
+  foldl f b Nil = b
 
 instance Foldable (Vec (CmpNat (n-1) 0) (n-1)) => Foldable (Vec 'GT n) where
   foldr f b (Cons a c) = f a (foldr f b c)
+  foldl f b (Cons a c) = foldl f (f b a) c
 
 instance Zip (Vec 'EQ 0) where
   zip Nil Nil = Nil
@@ -65,7 +67,7 @@ instance (KnownNat n, Default (Vec (CmpNat (n-1) 0) (n-1) a), Default a) => Defa
   def = Cons def def
 
 instance (Foldable (Vec a b), Show c) => Show (Vec a b c) where
-  show a = show $ foldr (:) [] a
+  show a = show $ toList a
 
 instance (Functor (Vec a b), Zip (Vec a b), Default (Vec a b ()), Num c) => Num (Vec a b c) where
   a + b = fmap (uncurry (+)) $ zip a b
@@ -84,6 +86,32 @@ vecHead (Cons a _) = a
 
 vecTail :: Vec 'GT n c -> Vec (CmpNat (n-1) 0) (n-1) c
 vecTail (Cons _ a) = a
+
+class VecJoin a b d e c where
+  vecJoin :: Vec a b c -> Vec d e c -> Vec (CmpNat (b+e) 0) (b+e) c
+
+instance VecJoin 'EQ 0 'EQ 0 c where
+  vecJoin _ _ = Nil
+
+instance (CmpNat e 0 ~ 'GT) => VecJoin 'EQ 0 'GT e c where
+  vecJoin _ a = a
+
+instance (CmpNat b 0 ~ 'GT) => VecJoin 'GT b 'EQ 0 c where
+  vecJoin a _ = a
+
+instance VecJoin (CmpNat (b-1) 0) (b-1) 'GT e c => VecJoin 'GT b 'GT e c where
+  vecJoin (Cons a b) c = Cons a $ vecJoin b c
+
+class VecReverse a b c where
+  vecReverse :: Vec a b c -> Vec a b c
+
+instance VecReverse 'EQ 0 c where
+  vecReverse _ = Nil
+
+{-
+instance VecReverse 'GT n c where
+  vecReverse (Cons a b) = verReverse b
+-}
 
 class VecTranspose a b c d e where
   vecTranspose :: (KnownNat d, Functor (Vec a b)) => Vec a b (Vec c d e) -> Vec c d (Vec a b e)
