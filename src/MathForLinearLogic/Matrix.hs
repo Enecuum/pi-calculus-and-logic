@@ -68,6 +68,9 @@ toDataMatrix a = fromLists $ matrixToLists a
 testMatrix :: Matrix 2 127
 testMatrix = Matrix (  (1 :. 2 :. ())  :.  (3 :. 4 :. ()) :. () )
 
+testMatrix02 :: Matrix 3 127
+testMatrix02 = Matrix (  (1 :. 2 :. 5 :. ())  :.  (3 :. 4 :. 6 :. ()) :. (7 :. 8 :. 9 :. ()) :. () )
+
 instance (KnownNat a, KnownNat b, VecToList (Vec a Integer) Integer, VecToList (Vec a (Vec a Integer)) (Vec a Integer)) => Show (Matrix a b) where
   show a = show $ toDataMatrix a
 
