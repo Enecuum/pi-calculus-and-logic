@@ -102,10 +102,8 @@ class VecReverse a b c where
 instance VecReverse 'EQ 0 c where
   vecReverse _ = Nil
 
-{-
-instance VecReverse 'GT n c where
-  vecReverse (Cons a b) = verReverse b
--}
+instance (((n - 1) + 1) ~ n, CmpNat n 0 ~ 'GT, VecReverse (CmpNat (n-1) 0) (n-1) c, VecJoin (CmpNat (n-1) 0) (n-1) 1 c) => VecReverse 'GT n c where
+  vecReverse (Cons a b) = vecReverse b `vecJoin` Cons a Nil
 
 class VecTranspose a b c d e where
   vecTranspose :: (KnownNat d, Functor (Vec a b)) => Vec a b (Vec c d e) -> Vec c d (Vec a b e)
