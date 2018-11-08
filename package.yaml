@@ -32,6 +32,7 @@ dependencies:
 - containers
 # TypeCompose >= 0.9.14
 # data-default-class
+# loch-th
 
 library:
   source-dirs: src

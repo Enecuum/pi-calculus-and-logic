@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists #-}
+{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists, TemplateHaskell, DeriveLift #-}
 
 module MathForLinearLogic.Vector where
 
@@ -16,6 +16,35 @@ import Data.Foldable
 import Data.Zip
 import Data.Default.Class
 import qualified GHC.Exts as E
+--import Language.Haskell.TH
+import Tools.FindCorrectTypesAtCompileTime
+import Language.Haskell.TH.Syntax
+
+data Vec (a :: Ordering) (b :: Nat) c where
+  Nil  :: Vec 'EQ 0 b
+  Cons :: KnownNat b => c -> Vec (CmpNat (b-1) 0) (b-1) c -> Vec 'GT b c
+
+instance Lift (Vec 'EQ 0 a) where
+  lift _ = return $ ConE $ mkName "Nil"
+
+instance (Lift (Vec (CmpNat (n-1) 0) (n-1) a), Lift a) => Lift (Vec 'GT n a) where
+  lift o@(Cons a b) = do
+     c <- lift a
+     d <- lift b
+     return $ (ConE $ mkName "Cons") `AppE` c `AppE` d
+
+{-
+   where
+    f :: Vec 'GT n a -> Proxy n
+    f = undefined
+    v :: Integer
+    v = natVal $ f o
+-}
+
+infixr 8 `Cons`
+
+
+
 
 test0001 :: Vec 'GT 4 Int
 test0001 = 1 `Cons` 2 `Cons` 3 `Cons` 4 `Cons` Nil
@@ -35,11 +64,8 @@ test0004 = (1 `Cons` 2 `Cons` 3 `Cons` Nil)
 
 test0005 = vecTranspose test0004
 
-infixr 8 `Cons`
+test0006 = [1,2,3,4,5] :: Vec 'GT 5 Double
 
-data Vec (a :: Ordering) (b :: Nat) c where
-  Nil  :: Vec 'EQ 0 b
-  Cons :: KnownNat b => c -> Vec (CmpNat (b-1) 0) (b-1) c -> Vec 'GT b c
 
 instance E.IsList (Vec 'EQ 0 a) where
   type Item (Vec 'EQ 0 a) = a
@@ -137,8 +163,6 @@ instance VecTranspose 'GT b 'EQ 0 e where
 
 instance (KnownNat (d-1), VecTranspose 'GT b (CmpNat (d-1) 0) (d-1) e) => VecTranspose 'GT b 'GT d e where
   vecTranspose a = Cons (fmap vecHead a) (vecTranspose $ fmap vecTail a)
-
-
 
 
 

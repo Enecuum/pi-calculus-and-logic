@@ -1,45 +1,35 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists, TemplateHaskell #-}
 
 module MathForLinearLogic.Test01 where
 
-import Data.Complex
-import System.IO.Unsafe
+import Prelude hiding (zip)
 import System.Random
+import Control.Monad
+import Data.List hiding (zip)
+import Math.NumberTheory.Primes.Factorisation
+import System.Random.Shuffle
+import Math.NumberTheory.Primes.Testing
+import GHC.TypeLits
+import Data.Proxy
+import Data.Functor
+import Data.Foldable
+import Data.Zip
+import Data.Default.Class
+import qualified GHC.Exts as E
+--import Language.Haskell.TH
+import Tools.FindCorrectTypesAtCompileTime
+import Language.Haskell.TH.Syntax
+import MathForLinearLogic.Vector
 
-op02 :: Complex Double -> Complex Double -> Complex Double
-op02 a b = one / ( one / a + one / b )
+--test0007 = [1,2,3,4,5] :: Vec 'GT $(detectNat) Double
 
-one = 1
+test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
 
-{-
-{-# NOINLINE one #-}
-one = unsafePerformIO $ do
-  a <- randomRIO (0.99,1.01)
-  b <- randomRIO (-0.01,0.01)
-  return (a :+ b)
--}
+--test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
 
-op01 :: Complex Double -> Complex Double -> Complex Double
-op01 a b = exp ( log a `op02` log b )
+--test0008 = $(liftString "( [1,2,3,4,5] :: Vec 'GT 5 Double )" )
 
-a % b = op01 a b
-a & b = op02 a b
+-- $(findCorrectTypesAtCompileTime [ [1,2,3,4,5] :: (KnownNat n, n ~ 5) => Vec 'GT n Double ] )
 
-a :: Complex Double
-a = 5
 
-b :: Complex Double
-b = 7
-
-c :: Complex Double
-c = 11
-
-d :: Complex Double
-d = 13
-
-e :: Complex Double
-e = 17
-
-f :: Complex Double
-f = 19
 
