@@ -16,10 +16,10 @@ import Data.Foldable
 import Data.Zip
 import Data.Default.Class
 import qualified GHC.Exts as E
---import Language.Haskell.TH
 import Tools.FindCorrectTypesAtCompileTime
 import Language.Haskell.TH.Syntax
 import MathForLinearLogic.Vector
+import Data.Dynamic
 
 test0008 = $(lift ( [1,2,3,4,5] :: Vec 'LT 1 Double ) )
 
@@ -29,19 +29,9 @@ test0010 = $(lift ( [1,2,3,4,5,6,7 :: Integer] :: Vec 'LT 1 Integer ) )
 
 test0011 = $(lift ( [] :: Vec 'EQ 0 Integer ) )
 
---test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
+test0012 = $(lift ( [[1,2],[3,4],[5,6]] :: Vec 'LT 1 (Vec 'LT 1 Int) ) )
 
---test0009 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
-
---test0007 = [1,2,3,4,5] :: Vec 'GT $(detectNat) Double
-
---test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
-
---test0008 = $(lift ( [1,2,3,4,5] :: Vec 'GT $(detectNat) Double ) )
-
---test0008 = $(liftString "( [1,2,3,4,5] :: Vec 'GT 5 Double )" )
-
--- $(findCorrectTypesAtCompileTime [ [1,2,3,4,5] :: (KnownNat n, n ~ 5) => Vec 'GT n Double ] )
+test0013 = $(lift ( [1,2,3,4,5,6,7 :: Float] :: Vec 'LT 1 Float ) )
 
 
 
