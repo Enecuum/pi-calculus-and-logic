@@ -1,10 +1,10 @@
-module MathForLinearLogic.AlgebraTests.BinaryAssociative where
+module MathForLinearLogic.AlgebraTests.TernaryAssociative where
 
 import System.Random
 import System.Console.ANSI
 import Control.Concurrent
 
-data BinAlg = Atom Integer | Op1 BinAlg BinAlg
+data TernAlg = Atom Integer | Op1 TernAlg TernAlg TernAlg
  deriving (Show)
 
 randomAtom = do
@@ -17,13 +17,17 @@ randomTerm p = do
   if a < 0.5 then randomAtom
              else do b <- randomTerm q
                      c <- randomTerm q
-                     return $ Op1 b c
+                     d <- randomTerm q
+                     return $ Op1 b c d
+
+{-
+randomRewrite 0 (Op1 
 
 randomRewrite w (Op1 a (Op1 b c)) |     w = Just (Op1 (Op1 a b) c)
 randomRewrite w (Op1 (Op1 a b) c) | not w = Just (Op1 a (Op1 b c))
 randomRewrite _ _ = Nothing
 
-randomRewriteTerm :: BinAlg -> IO BinAlg
+randomRewriteTerm :: TernAlg -> IO TernAlg
 randomRewriteTerm a = do
   w <- randomRIO (False,True)
   let b = randomRewrite w a
@@ -42,6 +46,7 @@ demo p = do
  where
   loop a = do a <- randomRewriteTerm a; clearScreen; setCursorPosition 0 0; print a; threadDelay 800000; loop a
   --loop a = do a <- randomRewriteTerm a; clearScreen; setCursorPosition 0 0; print a; threadDelay 400000; loop a
+-}
 
 
 
