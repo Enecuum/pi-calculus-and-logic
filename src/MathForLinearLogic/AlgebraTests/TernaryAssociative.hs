@@ -4,6 +4,8 @@ import System.Random
 import System.Console.ANSI
 import Control.Concurrent
 
+test01 = Op1 (Atom 101) (Atom 0) (Op1 (Atom 102) (Atom 0) (Op1 (Atom 103) (Atom 0) (Atom 104)))
+
 data TernAlg = Atom Integer | Op1 TernAlg TernAlg TernAlg
  deriving (Show)
 
@@ -44,8 +46,8 @@ cata f (Op1 a b c) = f (Op1 (cata f a) (cata f b) (cata f c))
 cata f a = f a
 
 randomRewriteTerm :: TernAlg -> IO TernAlg
-randomRewriteTerm b = do
-  a <- randomPermute b
+randomRewriteTerm a = do
+  -- a <- randomPermute b
   w <- randomRIO (0 :: Int, 5)
   let b = randomRewrite w a
   case (b,a) of

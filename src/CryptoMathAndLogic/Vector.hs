@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists, TemplateHaskell, DeriveLift #-}
 
-module MathForLinearLogic.Vector where
+module CryptoMathAndLogic.Vector where
 
 import Prelude hiding (zip)
 import System.Random
@@ -17,7 +17,7 @@ import Data.Zip
 import Data.Default.Class
 import qualified GHC.Exts as E
 --import Language.Haskell.TH
-import Tools.FindCorrectTypesAtCompileTime
+--import Tools.FindCorrectTypesAtCompileTime
 import Language.Haskell.TH.Syntax
 
 type family IsSnocArg (a :: Ordering) (b :: Nat) where

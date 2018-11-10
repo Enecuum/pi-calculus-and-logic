@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, GADTs, IncoherentInstances, OverloadedLists, TemplateHaskell, RankNTypes #-}
 
-module MathForLinearLogic.Test01 where
+module CryptoMathAndLogic.Vector.Test01 where
 
 import Prelude hiding (zip)
 import System.Random
@@ -16,9 +16,9 @@ import Data.Foldable
 import Data.Zip
 import Data.Default.Class
 import qualified GHC.Exts as E
-import Tools.FindCorrectTypesAtCompileTime
+--import Tools.FindCorrectTypesAtCompileTime
 import Language.Haskell.TH.Syntax
-import MathForLinearLogic.Vector
+import CryptoMathAndLogic.Vector
 import Data.Dynamic
 
 test0008 = $(lift ( [1,2,3,4,5] :: Vec 'LT 1 Double ) )

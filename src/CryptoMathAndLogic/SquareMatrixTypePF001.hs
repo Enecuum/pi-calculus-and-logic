@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, TypeOperators, KindSignatures, TypeFamilies, UndecidableInstances, ConstrainedClassMethods, AllowAmbiguousTypes, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts #-}
 
-module MathForLinearLogic.Matrix where
+module CryptoMathAndLogic.SquareMatrixTypePF001 where
 
 import Data.Matrix hiding (Matrix)
 import qualified Data.Matrix as M
@@ -124,8 +124,8 @@ randomCyclicMatrixPrime scale size = do
   let det = (c+1) * toInteger size - 1
   let list = replicate (size-1) (c+1) ++ [c]
   let tab = reverse $ take size $ iterate rotateList list
-  let det2 = detLaplace $ fromLists tab
-  case (size `mod` 2 == 1, det > 1 && isPrime det, det == det2, factorise det) of
+  let det2 = detLU $ fmap (toRational) $ fromLists tab
+  case (size `mod` 2 == 1, det > 1 && isPrime det, True, factorise det) of
     (False,_,_,_) -> error "invalid size"
     (_,True,_,_) -> print (log (realToFrac det) / log 2, (det, c), det2) >> return (log (realToFrac det) / log 2, (det, c))
     --(_,True,_,_) -> print (det2) >> return (log (realToFrac det) / log 2, (det, c))
