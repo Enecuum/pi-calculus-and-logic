@@ -7,20 +7,12 @@ newtype FixF f = InF ( f (FixF f) )
 instance Show (f (FixF f)) => Show (FixF f) where
   show (InF a) = show a
 
--- type Term = FixF (TermBF Integer)
--- type TermF a = TermBF Integer a
-
 type family (OutF a) where
   OutF (FixF f) = f (FixF f)
   OutF a = a
 
-type family InF a where
-  InF (f (FixF f)) = FixF f
-
 class Fixable a where
-  -- type OutF a
   inF :: OutF a -> a
-  -- outF :: InF (OutF a) -> OutF a
   outF :: a -> OutF a
 
 instance (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) where
@@ -30,22 +22,6 @@ instance (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) where
 instance (OutF q ~ q) => Fixable q where
   inF q = q
   outF q = q
-
-{-
-data TermBF a b where
-  U :: TermBF a b
-  W :: TermBF a b
-  N :: a -> TermBF a b
-  Add :: TermBF a (FixF (TermBF a)) -> TermBF a (FixF (TermBF a))  -> TermBF a (FixF (TermBF a))
-  Sub :: TermBF a (FixF (TermBF a)) -> TermBF a (FixF (TermBF a))  -> TermBF a (FixF (TermBF a))
-  Mul :: TermBF a (FixF (TermBF a)) -> TermBF a (FixF (TermBF a))  -> TermBF a (FixF (TermBF a))
-  Div :: TermBF a (FixF (TermBF a)) -> TermBF a (FixF (TermBF a))  -> TermBF a (FixF (TermBF a))
-  Mod :: TermBF a (FixF (TermBF a)) -> a -> TermBF a (FixF (TermBF a))
-  -- Pow :: TermBF a (FixF (TermBF a)) -> a -> TermBF a (FixF (TermBF a))
-  -- Pow :: (Fixable b, Fixable (InF (OutF b))) => OutF b -> a -> TermBF a b
-  -- Pow :: (InF (OutF b) ~ b, Fixable (InF (OutF b))) => OutF b -> a -> TermBF a b
-  Pow :: OutF b -> a -> TermBF a b
--}
 
 data TermBF a b
   = U | W | N a
@@ -92,19 +68,10 @@ termCondBimapM p f j o@(InF (N a)) | p o = do b <- f a; return (InF (N b))
 -}
 
 class CondBifunctorM t where
-  -- type OutF (FixF (t a))
   condBimapM :: (Monad m, Fixable b, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
---instance (OutF (FixF (TermBF a)) ~ TermBF a (FixF (TermBF a))) => CondBifunctorM TermBF where
---instance (TermBF a b, OutF b ~ FixF (TermBF a)) => CondBifunctorM (TermBF :: * -> * -> *) where
 instance CondBifunctorM TermBF where
-  -- type OutF (FixF (TermBF a)) = TermBF a (FixF (TermBF a))
   condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f b; return (outF c `Pow` d)
-{-
-   where
-    jj :: (Fixable b, Fixable d, Monad m) => (b -> m d) -> OutF b -> m (OutF d)
-    jj j a = do b <- j (inF a); return (outF b)
--}
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
 
