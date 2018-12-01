@@ -22,7 +22,6 @@ instance {-# OVERLAPPING #-} (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) wh
   inF = InF
   outF (InF a) = a
 
--- instance {-# OVERLAPPABLE #-} (OutF q ~ q, q ~ Integer) => Fixable q where
 instance {-# OVERLAPPABLE #-} (OutF q ~ q) => Fixable q where
   inF q = q
   outF q = q
@@ -76,12 +75,13 @@ test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) te
 test03 :: Term
 test03 = ( 2 + 3 ) * 4
 
-{-
 test04 = print "yes" >> cataM (const True) f test03
  where
-  f (InF (N a)) = return $ InF $ N (a+1)
-  f a = return  a
--}
+  f :: TermBF Integer Integer -> IO Integer
+  f (a `Add` b) = return (a+b)
+  f (a `Mul` b) = return (a*b)
+  f (N n) = return n
+  f a = error (show a)
 
 
 cataM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a (FixF (t a)) -> Bool) -> (t a b -> m b) -> FixF (t a) -> m b
