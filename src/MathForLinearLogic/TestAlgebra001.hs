@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, DatatypeContexts, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts #-}
+{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, DatatypeContexts, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies #-}
 
 module MathForLinearLogic.TestAlgebra001 where
 
@@ -10,25 +10,28 @@ instance Show (f (FixF f)) => Show (FixF f) where
 -- type Term = FixF (TermBF Integer)
 -- type TermF a = TermBF Integer a
 
-{-
 type family (OutF a) where
   OutF (FixF f) = f (FixF f)
--}
+  OutF a = a
 
 type family InF a where
   InF (f (FixF f)) = FixF f
 
 class Fixable a where
-  type OutF a
+  -- type OutF a
   inF :: OutF a -> a
   -- outF :: InF (OutF a) -> OutF a
   outF :: a -> OutF a
 
-instance Fixable (FixF f) where
-  type OutF (FixF f) = f (FixF f)
+instance (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) where
   inF = InF
   outF (InF a) = a
 
+instance (OutF q ~ q) => Fixable q where
+  inF q = q
+  outF q = q
+
+{-
 data TermBF a b where
   U :: TermBF a b
   W :: TermBF a b
@@ -40,10 +43,11 @@ data TermBF a b where
   Mod :: TermBF a (FixF (TermBF a)) -> a -> TermBF a (FixF (TermBF a))
   -- Pow :: TermBF a (FixF (TermBF a)) -> a -> TermBF a (FixF (TermBF a))
   -- Pow :: (Fixable b, Fixable (InF (OutF b))) => OutF b -> a -> TermBF a b
-  Pow :: (InF (OutF b) ~ b, Fixable (InF (OutF b))) => OutF b -> a -> TermBF a b
+  -- Pow :: (InF (OutF b) ~ b, Fixable (InF (OutF b))) => OutF b -> a -> TermBF a b
+  Pow :: OutF b -> a -> TermBF a b
+-}
 
-{-
-data Fixable b => TermBF a b
+data TermBF a b
   = U | W | N a
   | OutF b `Add` OutF b
   | OutF b `Sub` OutF b
@@ -51,7 +55,6 @@ data Fixable b => TermBF a b
   | OutF b `Div` OutF b
   | OutF b `Mod` a
   | OutF b `Pow` a
--}
 
 -- deriving instance Show (TermF Term)
 
@@ -90,16 +93,18 @@ termCondBimapM p f j o@(InF (N a)) | p o = do b <- f a; return (InF (N b))
 
 class CondBifunctorM t where
   -- type OutF (FixF (t a))
-  condBimapM :: Monad m => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
+  condBimapM :: (Monad m, Fixable b, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
 --instance (OutF (FixF (TermBF a)) ~ TermBF a (FixF (TermBF a))) => CondBifunctorM TermBF where
 --instance (TermBF a b, OutF b ~ FixF (TermBF a)) => CondBifunctorM (TermBF :: * -> * -> *) where
 instance CondBifunctorM TermBF where
   -- type OutF (FixF (TermBF a)) = TermBF a (FixF (TermBF a))
-  condBimapM p f j o@(a `Pow` b) | p o = do c <- jj j a; d <- f b; return (c `Pow` d)
+  condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f b; return (outF c `Pow` d)
+{-
    where
     jj :: (Fixable b, Fixable d, Monad m) => (b -> m d) -> OutF b -> m (OutF d)
-    jj j a = do b <- j (inF a); return undefined
+    jj j a = do b <- j (inF a); return (outF b)
+-}
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
 
