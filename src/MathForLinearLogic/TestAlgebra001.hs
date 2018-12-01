@@ -76,19 +76,20 @@ condCataM p f a = f =<< condBimapM p return (condCataM p f) (outF a)
 condAnaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a b -> Bool) -> (b -> m (t a b)) -> b -> m (FixF (t a))
 condAnaM p f a = (return . InF) =<< condBimapM p return (condAnaM p f) =<< f a
 
-condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c, Fixable d) =>
-             (Int -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
-condHyloM _ f e g a = f =<< e =<< condBimapM p return (condHyloM p f e g) =<< g a
- where
-  p = const True
+condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c, Fixable d)
+          => (f c d -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
+condHyloM p f e g a = f =<< e =<< condBimapM p return (condHyloM p f e g) =<< g a
 
-condCata p f     a = runIdentity $ condCataM p (return . f) a
-condAna  p f     a = runIdentity $ condAnaM  p (return . f) a
-condHylo p f e g a = runIdentity $ condHyloM p (return . f) (return . e) (return . g) a
+condParaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b)
+          => (t a b -> Bool) -> (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
+condParaM p q f a = f =<< condBimapM p return (\b -> return (a,b)) =<< condBimapM q return (condParaM p q f) (outF a)
+
+condCata p   f     a = runIdentity $ condCataM p   (return . f)                           a
+condAna  p   f     a = runIdentity $ condAnaM  p   (return . f)                           a
+condHylo p   f e g a = runIdentity $ condHyloM p   (return . f) (return . e) (return . g) a
+condPara p q f     a = runIdentity $ condParaM p q (return . f)                           a
 
 {-
-termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
-termHyloM p f g a = g a >>= termMapM p (termHyloM p f g) >>= f
 
 termParaM :: Monad m => (Term -> Bool) -> ((Term, Term) -> m Term) -> Term -> m Term
 termParaM p f a = termMapM p (termParaM p f) a >>= curry f a
@@ -186,7 +187,16 @@ test06 = condAna (const True) f 1
   f n = ( (n+1) `Add` (n+1) )
 
 
+-- condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c, Fixable d) =>
+--              (Int -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
 
+{-
+test07 :: Integer -> Integer
+test07 n = condHylo (const True) f e g n
+ where
+  f 1 = Left 1
+  f n = ( Left 1 `Add` Right (n-1) )
+-}
 
 
 
