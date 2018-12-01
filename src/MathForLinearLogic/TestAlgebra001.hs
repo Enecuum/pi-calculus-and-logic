@@ -99,7 +99,7 @@ instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Pow` b) | p o = do c <- jj j a; d <- f b; return (c `Pow` d)
    where
     jj :: Monad m => (b -> m d) -> OutF b -> m (OutF d)
-    jj _ = undefined
+    jj _ a = do b <- j (InF a); return undefined
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
 
