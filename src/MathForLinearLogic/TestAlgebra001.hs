@@ -1,6 +1,8 @@
-{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, DatatypeContexts, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies, IncoherentInstances #-}
+{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies, IncoherentInstances #-}
 
 module MathForLinearLogic.TestAlgebra001 where
+
+import Data.Functor.Identity
 
 newtype FixF f = InF ( f (FixF f) )
 
@@ -57,6 +59,9 @@ reduce a = a
 
 class CondBifunctorM t where
   condBimapM :: (Monad m, Fixable a, Fixable b, Fixable c, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
+
+-- instance (CondBifunctorM t, Fixable a) => Functor (t a) where
+--  fmap f a = runIdentity $ condBimapM (const True) return (return . f) a
 
 instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Add` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Add` outF d)
