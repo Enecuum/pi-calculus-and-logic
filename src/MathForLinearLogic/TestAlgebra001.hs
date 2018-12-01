@@ -7,6 +7,9 @@ newtype FixF f = InF ( f (FixF f) )
 instance Show (f (FixF f)) => Show (FixF f) where
   show (InF a) = show a
 
+type Term = FixF (TermBF Integer)
+type TermF a = TermBF Integer a
+
 type family (OutF a) where
   OutF (FixF f) = f (FixF f)
   OutF a = a
@@ -15,11 +18,11 @@ class Fixable a where
   inF :: OutF a -> a
   outF :: a -> OutF a
 
-instance (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) where
+instance {-# OVERLAPPING #-} (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) where
   inF = InF
   outF (InF a) = a
 
-instance (OutF q ~ q) => Fixable q where
+instance {-# OVERLAPPABLE #-} (OutF q ~ q, q ~ Double) => Fixable q where
   inF q = q
   outF q = q
 
@@ -32,17 +35,17 @@ data TermBF a b
   | OutF b `Mod` a
   | OutF b `Pow` a
 
--- deriving instance Show (TermF Term)
+deriving instance Show (TermBF () Double)
+deriving instance Show (TermF Term)
 
 infixr 7 `Add`
 infixr 7 `Sub`
 infixr 8 `Mul`
 infixr 8 `Div`
 
--- n :: Integer -> Term
--- n x = InF $ N x
+n :: Integer -> Term
+n x = InF $ N x
 
-{-
 instance Num Term where
   a - b = reduce $ InF (outF a `Sub` outF b)
   a + b = reduce $ InF (outF a `Add` outF b)
@@ -52,40 +55,33 @@ instance Num Term where
 reduce :: Term -> Term
 reduce a = a
 
-termCondBimapM :: Monad m => (TermBF a b -> Bool) -> (a -> m a) -> (b -> m b) -> TermBF a b -> m (TermBF a b)
-termCondBimapM = undefined
--}
-
-{-
-termCondBimapM :: Monad m => (Term -> Bool) -> (Integer -> m Integer) -> (Term -> m Term) -> Term -> m Term
-termCondBimapM p f j o@(InF (a `Add` b)) | p o = do InF c <- j (InF a); InF d <- j (InF b); return (InF (c `Add` d))
-termCondBimapM p f j o@(InF (a `Sub` b)) | p o = do InF c <- j (InF a); InF d <- j (InF b); return (InF (c `Sub` d))
-termCondBimapM p f j o@(InF (a `Mul` b)) | p o = do InF c <- j (InF a); InF d <- j (InF b); return (InF (c `Mul` d))
-termCondBimapM p f j o@(InF (a `Div` b)) | p o = do InF c <- j (InF a); InF d <- j (InF b); return (InF (c `Div` d))
-termCondBimapM p f j o@(InF (a `Mod` b)) | p o = do InF c <- j (InF a);     d <- f      b ; return (InF (c `Mod` d))
-termCondBimapM p f j o@(InF (a `Pow` b)) | p o = do InF c <- j (InF a);     d <- f      b ; return (InF (c `Pow` d))
-termCondBimapM p f j o@(InF (N a)) | p o = do b <- f a; return (InF (N b))
--}
-
 class CondBifunctorM t where
   condBimapM :: (Monad m, Fixable b, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
 instance CondBifunctorM TermBF where
-  condBimapM p f j o@(a `Mod` b) | p o = do c <- j (inF a); d <- f b; return (outF c `Mod` d)
-  condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f b; return (outF c `Pow` d)
+  condBimapM p f j o@(a `Add` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Add` outF d)
+  condBimapM p f j o@(a `Sub` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Sub` outF d)
+  condBimapM p f j o@(a `Mul` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Mul` outF d)
+  condBimapM p f j o@(a `Div` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Div` outF d)
+  condBimapM p f j o@(a `Mod` b) | p o = do c <- j (inF a); d <- f      b ; return (outF c `Mod`      d)
+  condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f      b ; return (outF c `Pow`      d)
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
+test01 :: TermBF () Double
+test01 = 1 `Add` 2
 
-{-
-jj :: Monad m => a -> m (OutF b)
-jj a = undefined
--}
+test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) test01
 
--- TermBF OutF b -> b
+test03 :: Term
+test03 = ( 2 + 3 ) * 4
+
+test04 = print "yes" >> condBimapM (const True) (\a -> print a >> (return $ a + 1)) return (outF test03)
 
 
--- cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m b) -> FixF (t a) -> m b
--- cataM p f a = condBimapM p return ((condBimapM p return f . outF) >>= (return . InF)) (outF a) >>= f
+cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m b) -> FixF (t a) -> m b
+-- cataM p f a = condBimapM p return ((condBimapM p return f . undefined) >>= (return . undefined)) (outF a) >>= (f . InF)
+-- cataM p f a = condBimapM p return ^ (outF a) >>= (f . InF)
+cataM p f a = do b <- condBimapM p return (cataM p f) (outF a); return (b) -- f (InF b)
 
 {-
 termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
