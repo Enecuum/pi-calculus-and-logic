@@ -40,7 +40,7 @@ data TermBF a b where
   Mod :: TermBF a (FixF (TermBF a)) -> a -> TermBF a (FixF (TermBF a))
   -- Pow :: TermBF a (FixF (TermBF a)) -> a -> TermBF a (FixF (TermBF a))
   -- Pow :: (Fixable b, Fixable (InF (OutF b))) => OutF b -> a -> TermBF a b
-  Pow :: OutF b -> a -> TermBF a b
+  Pow :: (InF (OutF b) ~ b, Fixable (InF (OutF b))) => OutF b -> a -> TermBF a b
 
 {-
 data Fixable b => TermBF a b
@@ -98,8 +98,8 @@ instance CondBifunctorM TermBF where
   -- type OutF (FixF (TermBF a)) = TermBF a (FixF (TermBF a))
   condBimapM p f j o@(a `Pow` b) | p o = do c <- jj j a; d <- f b; return (c `Pow` d)
    where
-    jj :: Monad m => (b -> m d) -> OutF b -> m (OutF d)
-    jj _ a = do b <- j (InF a); return undefined
+    jj :: (Fixable b, Fixable d, Monad m) => (b -> m d) -> OutF b -> m (OutF d)
+    jj j a = do b <- j (inF a); return undefined
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
 
