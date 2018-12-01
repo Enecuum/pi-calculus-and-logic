@@ -46,9 +46,6 @@ infixr 7 `Sub`
 infixr 8 `Mul`
 infixr 8 `Div`
 
-n :: Integer -> Term
-n x = InF $ N x
-
 instance Num Term where
   a - b = reduce $ InF (outF a `Sub` outF b)
   a + b = reduce $ InF (outF a `Add` outF b)
@@ -60,6 +57,8 @@ reduce a = a
 
 class CondBifunctorM t where
   condBimapM :: (Monad m, Fixable a, Fixable b, Fixable c, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
+
+condBimap p f j a = runIdentity $ condBimapM p (return . f) (return . j) a
 
 instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Add` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Add` outF d)
@@ -76,6 +75,9 @@ condCataM p f a = f =<< condBimapM p return (condCataM p f) (outF a)
 
 condAnaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a b -> Bool) -> (b -> m (t a b)) -> b -> m (FixF (t a))
 condAnaM p f a = (return . InF) =<< condBimapM p return (condAnaM p f) =<< f a
+
+condCata p f a = runIdentity $ condCataM p (return . f) a
+condAna  p f a = runIdentity $ condAnaM  p (return . f) a
 
 {-
 termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
@@ -150,28 +152,31 @@ lli(a/b) = lli01(b) / lli01(a)
 
 -}
 
+n :: Integer -> Term
+n x = InF $ N x
+
 test01 :: TermBF Integer Integer
 test01 = 1 `Add` 2
 
-test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) test01
+test02 = condBimap (const True) id (+1) test01
 
 test03 :: Term
 test03 = ( 2 + 3 ) * 4
 
-test04 = print "yes" >> condCataM (const True) f test03
+test04 = condCata (const True) f test03
  where
-  f :: TermBF Integer Integer -> IO Integer
-  f (a `Add` b) = return (a+b)
-  f (a `Mul` b) = return (a*b)
-  f (N n) = return n
+  f :: TermBF Integer Integer -> Integer
+  f (a `Add` b) = (a+b)
+  f (a `Mul` b) = (a*b)
+  f (N n) = n
   f a = error (show a)
 
-test06 :: IO (FixF (TermBF Integer))
-test06 = print "yes" >> condAnaM (const True) f 1
+test06 :: FixF (TermBF Integer)
+test06 = condAna (const True) f 1
  where
-  f :: Integer -> IO (TermBF Integer Integer)
-  f 5 = return (N 99)
-  f n = return ( (n+1) `Add` (n+1) )
+  f :: Integer -> (TermBF Integer Integer)
+  f 5 = (N 99)
+  f n = ( (n+1) `Add` (n+1) )
 
 
 
