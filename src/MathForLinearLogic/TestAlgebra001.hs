@@ -76,8 +76,15 @@ condCataM p f a = f =<< condBimapM p return (condCataM p f) (outF a)
 condAnaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a b -> Bool) -> (b -> m (t a b)) -> b -> m (FixF (t a))
 condAnaM p f a = (return . InF) =<< condBimapM p return (condAnaM p f) =<< f a
 
-condCata p f a = runIdentity $ condCataM p (return . f) a
-condAna  p f a = runIdentity $ condAnaM  p (return . f) a
+condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c, Fixable d) =>
+             (Int -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
+condHyloM _ f e g a = f =<< e =<< condBimapM p return (condHyloM p f e g) =<< g a
+ where
+  p = const True
+
+condCata p f     a = runIdentity $ condCataM p (return . f) a
+condAna  p f     a = runIdentity $ condAnaM  p (return . f) a
+condHylo p f e g a = runIdentity $ condHyloM p (return . f) (return . e) (return . g) a
 
 {-
 termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
