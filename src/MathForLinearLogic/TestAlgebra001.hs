@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, DatatypeContexts, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies #-}
+{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, DatatypeContexts, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies, IncoherentInstances #-}
 
 module MathForLinearLogic.TestAlgebra001 where
 
@@ -22,7 +22,8 @@ instance {-# OVERLAPPING #-} (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) wh
   inF = InF
   outF (InF a) = a
 
-instance {-# OVERLAPPABLE #-} (OutF q ~ q, q ~ Integer) => Fixable q where
+-- instance {-# OVERLAPPABLE #-} (OutF q ~ q, q ~ Integer) => Fixable q where
+instance {-# OVERLAPPABLE #-} (OutF q ~ q) => Fixable q where
   inF q = q
   outF q = q
 
@@ -35,7 +36,7 @@ data TermBF a b
   | OutF b `Mod` a
   | OutF b `Pow` a
 
-deriving instance Show (TermBF () Double)
+deriving instance Show (TermBF Integer Integer)
 deriving instance Show (TermF Term)
 
 infixr 7 `Add`
@@ -56,7 +57,7 @@ reduce :: Term -> Term
 reduce a = a
 
 class CondBifunctorM t where
-  condBimapM :: (Monad m, Fixable b, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
+  condBimapM :: (Monad m, Fixable a, Fixable b, Fixable c, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
 instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Add` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Add` outF d)
@@ -82,7 +83,7 @@ test04 = print "yes" >> cataM (const True) f test03
 
 
 -- cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m b) -> FixF (t a) -> m b
-cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m (FixF (t a))) -> FixF (t a) -> m (FixF (t a))
+cataM :: (CondBifunctorM t, Monad m, Fixable a) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m (FixF (t a))) -> FixF (t a) -> m (FixF (t a))
 cataM p f a = do b <- condBimapM p return (cataM p f) (outF a); f (inF b)
 
 {-
