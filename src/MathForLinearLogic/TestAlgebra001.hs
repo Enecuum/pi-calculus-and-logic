@@ -166,6 +166,26 @@ test04 = print "yes" >> condCataM (const True) f test03
   f (N n) = return n
   f a = error (show a)
 
+test06 :: IO (FixF (TermBF Integer))
+test06 = print "yes" >> condAnaM (const True) f 1
+ where
+  f :: Integer -> IO (TermBF Integer Integer)
+  f 5 = return (N 99)
+  f n = return ( (n+1) `Add` (n+1) )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
