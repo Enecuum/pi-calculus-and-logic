@@ -22,7 +22,7 @@ instance {-# OVERLAPPING #-} (OutF (FixF f) ~ f (FixF f)) => Fixable (FixF f) wh
   inF = InF
   outF (InF a) = a
 
-instance {-# OVERLAPPABLE #-} (OutF q ~ q, q ~ Double) => Fixable q where
+instance {-# OVERLAPPABLE #-} (OutF q ~ q, q ~ Integer) => Fixable q where
   inF q = q
   outF q = q
 
@@ -67,7 +67,7 @@ instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f      b ; return (outF c `Pow`      d)
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
-test01 :: TermBF () Double
+test01 :: TermBF Integer Integer
 test01 = 1 `Add` 2
 
 test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) test01
@@ -75,13 +75,15 @@ test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) te
 test03 :: Term
 test03 = ( 2 + 3 ) * 4
 
-test04 = print "yes" >> condBimapM (const True) (\a -> print a >> (return $ a + 1)) return (outF test03)
+test04 = print "yes" >> cataM (const True) f test03
+ where
+  f (InF (N a)) = return $ InF $ N (a+1)
+  f a = return  a
 
 
-cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m b) -> FixF (t a) -> m b
--- cataM p f a = condBimapM p return ((condBimapM p return f . undefined) >>= (return . undefined)) (outF a) >>= (f . InF)
--- cataM p f a = condBimapM p return ^ (outF a) >>= (f . InF)
-cataM p f a = do b <- condBimapM p return (cataM p f) (outF a); return (b) -- f (InF b)
+-- cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m b) -> FixF (t a) -> m b
+cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m (FixF (t a))) -> FixF (t a) -> m (FixF (t a))
+cataM p f a = do b <- condBimapM p return (cataM p f) (outF a); f (inF b)
 
 {-
 termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
