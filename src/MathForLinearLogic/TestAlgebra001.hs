@@ -76,15 +76,16 @@ test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) te
 test03 :: Term
 test03 = ( 2 + 3 ) * 4
 
+{-
 test04 = print "yes" >> cataM (const True) f test03
  where
   f (InF (N a)) = return $ InF $ N (a+1)
   f a = return  a
+-}
 
 
--- cataM :: (CondBifunctorM t, Monad m) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m b) -> FixF (t a) -> m b
-cataM :: (CondBifunctorM t, Monad m, Fixable a) => (t a (FixF (t a)) -> Bool) -> (FixF (t a) -> m (FixF (t a))) -> FixF (t a) -> m (FixF (t a))
-cataM p f a = do b <- condBimapM p return (cataM p f) (outF a); f (inF b)
+cataM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a (FixF (t a)) -> Bool) -> (t a b -> m b) -> FixF (t a) -> m b
+cataM p f a = f =<< condBimapM p return (cataM p f) (outF a)
 
 {-
 termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
