@@ -71,6 +71,7 @@ class CondBifunctorM t where
   condBimapM :: (Monad m, Fixable b, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
 instance CondBifunctorM TermBF where
+  condBimapM p f j o@(a `Mod` b) | p o = do c <- j (inF a); d <- f b; return (outF c `Mod` d)
   condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f b; return (outF c `Pow` d)
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
