@@ -3,6 +3,7 @@
 module MathForLinearLogic.TestAlgebra001 where
 
 import Data.Functor.Identity
+import Control.Monad
 
 newtype FixF f = InF ( f (FixF f) )
 
@@ -37,7 +38,7 @@ data TermBF a b
   | OutF b `Mod` a
   | OutF b `Pow` a
 
-deriving instance Show (TermBF Integer Integer)
+deriving instance (Show a, Show (OutF b)) => Show (TermBF a b)
 deriving instance Show (TermF Term)
 
 infixr 7 `Add`
@@ -60,9 +61,6 @@ reduce a = a
 class CondBifunctorM t where
   condBimapM :: (Monad m, Fixable a, Fixable b, Fixable c, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
--- instance (CondBifunctorM t, Fixable a) => Functor (t a) where
---  fmap f a = runIdentity $ condBimapM (const True) return (return . f) a
-
 instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Add` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Add` outF d)
   condBimapM p f j o@(a `Sub` b) | p o = do c <- j (inF a); d <- j (inF b); return (outF c `Sub` outF d)
@@ -72,30 +70,14 @@ instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f      b ; return (outF c `Pow`      d)
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
 
-test01 :: TermBF Integer Integer
-test01 = 1 `Add` 2
 
-test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) test01
+condCataM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a (FixF (t a)) -> Bool) -> (t a b -> m b) -> FixF (t a) -> m b
+condCataM p f a = f =<< condBimapM p return (condCataM p f) (outF a)
 
-test03 :: Term
-test03 = ( 2 + 3 ) * 4
-
-test04 = print "yes" >> cataM (const True) f test03
- where
-  f :: TermBF Integer Integer -> IO Integer
-  f (a `Add` b) = return (a+b)
-  f (a `Mul` b) = return (a*b)
-  f (N n) = return n
-  f a = error (show a)
-
-
-cataM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a (FixF (t a)) -> Bool) -> (t a b -> m b) -> FixF (t a) -> m b
-cataM p f a = f =<< condBimapM p return (cataM p f) (outF a)
+condAnaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a b -> Bool) -> (b -> m (t a b)) -> b -> m (FixF (t a))
+condAnaM p f a = (return . InF) =<< condBimapM p return (condAnaM p f) =<< f a
 
 {-
-termAnaM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> Term -> m Term
-termAnaM p f a = f a >>= termMapM p (termAnaM p f)
-
 termHyloM :: Monad m => (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
 termHyloM p f g a = g a >>= termMapM p (termHyloM p f g) >>= f
 
@@ -167,3 +149,23 @@ lli(a/b) = lli01(b) / lli01(a)
 
 
 -}
+
+test01 :: TermBF Integer Integer
+test01 = 1 `Add` 2
+
+test02 = print "yes" >> condBimapM (const True) return (\a -> return $ a + 1) test01
+
+test03 :: Term
+test03 = ( 2 + 3 ) * 4
+
+test04 = print "yes" >> condCataM (const True) f test03
+ where
+  f :: TermBF Integer Integer -> IO Integer
+  f (a `Add` b) = return (a+b)
+  f (a `Mul` b) = return (a*b)
+  f (N n) = return n
+  f a = error (show a)
+
+
+
+
