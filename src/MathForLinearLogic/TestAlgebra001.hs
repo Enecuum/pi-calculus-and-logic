@@ -1,13 +1,106 @@
+{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, DatatypeContexts #-}
+
 module MathForLinearLogic.TestAlgebra001 where
 
-data LLN = U | W | LLN `Mul` LLN | LLN `Add` LLN | LLN `Div` LLN | LLN `Sub` LLN | LLN `Pow` Integer | LLN `Mod` Integer | N Integer
- deriving (Show,Ord)
+newtype FixF f = InF { outF :: f (FixF f) }
 
-instance Num LLN where
+type Term = TermF TermA
+type TermA = FixF (TermBF Integer)
+type TermF a = TermBF Integer a
+
+data (a ~ Integer, b ~ TermA) => TermBF a b
+  = U | W | N Integer
+  | TermA `Add` TermA
+  | TermA `Sub` TermA
+  | TermA `Mul` TermA
+  | TermA `Div` TermA
+  | TermA `Mod` Integer
+  | TermA `Pow` Integer
+
+{-
+data TermBF a b where
+  U   :: Term
+  W   :: Term
+  N   :: Integer          -> Term
+  Add :: TermA -> TermA   -> Term
+  Sub :: TermA -> TermA   -> Term
+  Mul :: TermA -> TermA   -> Term
+  Div :: TermA -> TermA   -> Term
+  Mod :: TermA -> Integer -> Term
+  Pow :: TermA -> Integer -> Term
+-}
+  
+
+{-
+data Term a where
+  U ::            Term Value
+  W ::            Term Value
+  N :: Integer -> Term Value
+  Add :: Term a -> Term b -> Term Expr
+  Sub :: Term a -> Term b -> Term Expr
+  Mul :: Term a -> Term b -> Term Expr
+  Div :: Term a -> Term b -> Term Expr
+  Mod :: Term a -> Integer -> Term Expr
+  Pow :: Term a -> Integer -> Term Expr
+-}
+
+{-
+type PT = PrettyTerm
+data PrettyTerm = PTerm (Term Value) | PT `PAdd` PT | PT `PSub` PT | PT `PMul` PT | PT `PDiv` PT | PT `PMod` Integer | PT `PPow` Integer
+ deriving Show
+
+infixr 7 `PAdd`
+infixr 7 `PSub`
+infixr 8 `PMul`
+infixr 8 `PDiv`
+
+instance Show (Term Value) where
+  show U = "u"
+  show W = "w"
+  show (N n) = show n
+
+termToPretty :: Term a -> PrettyTerm
+termToPretty (Add a b) = termToPretty a `PAdd` termToPretty b
+termToPretty (Sub a b) = termToPretty a `PSub` termToPretty b
+termToPretty (Mul a b) = termToPretty a `PMul` termToPretty b
+termToPretty (Div a b) = termToPretty a `PDiv` termToPretty b
+termToPretty (Mod a b) = termToPretty a `PMod` b
+termToPretty (Pow a b) = termToPretty a `PPow` b
+termToPretty U = PTerm U
+termToPretty W = PTerm W
+termToPretty (N n) = PTerm (N n)
+
+instance Show (Term Expr) where
+  show a = show $ termToPretty a
+
+n x = N x
+
+instance Num (Term a) where
   a - b = reduce (a `Sub` b)
   a + b = reduce (a `Add` b)
   a * b = reduce (a `Mul` b)
   fromInteger n = N n
+
+reduce a = a
+-}
+
+{-
+data Term = U | W | N Integer
+   | Term `Mul` Term
+   | Term `Add` Term
+   | Term `Div` Term
+   | Term `Sub` Term
+   | Term `Pow` Integer
+   | Term `Mod` Integer
+ deriving (Show)
+
+termCondBimapM :: Monad m -> (Term -> Bool) -> (Term -> m Term) -> (Term -> m Term) -> Term -> m Term
+termCondBimapM p f j o | p o = j o
+-}
+
+
+
+{-
 
 instance Eq LLN where
   (a `Mul` b) == (c `Mul` d) = ( (a == c) && (b == d) ) || ( (a == d) && (b == c) )
@@ -35,7 +128,7 @@ reduce (N a `Mul` N b) = N (a*b)
 reduce (N a `Sub` N b) = N (a-b)
 reduce a = a
 
-n x = N x
+-}
 
 {-
 
