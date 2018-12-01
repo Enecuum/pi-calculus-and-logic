@@ -68,6 +68,7 @@ instance CondBifunctorM TermBF where
   condBimapM p f j o@(a `Mod` b) | p o = do c <- j (inF a); d <- f      b ; return (outF c `Mod`      d)
   condBimapM p f j o@(a `Pow` b) | p o = do c <- j (inF a); d <- f      b ; return (outF c `Pow`      d)
   condBimapM p f j o@(N a) | p o = do b <- f a; return (N b)
+  condBimapM p f j U = return U
 
 
 condCataM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a (FixF (t a)) -> Bool) -> (t a b -> m b) -> FixF (t a) -> m b
@@ -186,17 +187,27 @@ test06 = condAna (const True) f 1
   f 5 = (N 99)
   f n = ( (n+1) `Add` (n+1) )
 
+test07 :: FixF (TermBF Integer) -> Integer
+test07 (InF U) = 0
+test07 (InF (a `Mod` 1)) = test07 (InF a) + 1
+
+--test08 :: TermBF Integer (FixF (TermBF Integer))
+test08 :: FixF (TermBF Integer)
+test08 = InF $ foldr (\a b -> b `Mod` 1) U [1..5]
+
 
 -- condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c, Fixable d) =>
 --              (Int -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
 
-{-
-test07 :: Integer -> Integer
-test07 n = condHylo (const True) f e g n
+-- condParaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b)
+--          => (t a b -> Bool) -> (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
+
+test09 :: Integer
+test09 = condPara (const True) (const True) f test08
  where
-  f 1 = Left 1
-  f n = ( Left 1 `Add` Right (n-1) )
--}
+  f U = 1
+  f ((a,b) `Mod` 1) = test07 a * b
+  f a = error (show a)
 
 
 
