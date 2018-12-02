@@ -39,6 +39,7 @@ data TermBF a b
   | OutF b `Pow` a
 
 deriving instance (Show a, Show (OutF b)) => Show (TermBF a b)
+deriving instance Show a => Show (TermBF a (FixF (TermBF a)))
 deriving instance Show (TermF Term)
 
 infixr 7 `Add`
@@ -54,6 +55,38 @@ instance Num Term where
 
 reduce :: Term -> Term
 reduce a = a
+
+{-
+reduce (a `Mul` b) | a > b = b `Mul` a
+reduce (N 1 `Mul` U `Add` W) = N 1
+reduce (U `Pow` N 2) = N 1
+reduce (U `Mul` W `Add` W) = 0
+reduce (a `Mul` b) | a == b = a `Pow` N 2
+reduce (a `Mul` b `Pow` c) | a == b = a `Pow` (b `Add` N 1)
+reduce (N a `Add` N b) = N (a+b)
+reduce (N a `Mul` N b) = N (a*b)
+reduce (N a `Sub` N b) = N (a-b)
+reduce a = a
+instance Eq LLN where
+  (a `Mul` b) == (c `Mul` d) = ( (a == c) && (b == d) ) || ( (a == d) && (b == c) )
+  (a `Add` b) == (c `Add` d) = ( (a == c) && (b == d) ) || ( (a == d) && (b == c) )
+  N a == N b = a == b
+  a == b = show (reduce a) == show (reduce b)
+lli (a `Div` b) = reduce ( lli01 b `Div` lli01 a )
+ where
+  lli01 x = x * U + W
+lli a = lli (a `Div` N 1)
+lli01(x) = (x*u+w)
+lli01(lli01(x)) = x
+(x*u+w)*u+w = x
+(x*u+w)*u+w = x*u*u + u*w + w
+(x*u+w)*u+w = x*1   + u*w + w
+(x*u+w)*u+w = x*1   + 0
+1*u+w = 1
+u*u = 1
+u*w + w = 0
+lli(a/b) = lli01(b) / lli01(a)
+-}
 
 class CondBifunctorM t where
   condBimapM :: (Monad m, Fixable a, Fixable b, Fixable c, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
@@ -71,23 +104,31 @@ instance CondBifunctorM TermBF where
   condBimapM p f j U = return U
 
 
-condCataM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a (FixF (t a)) -> Bool) -> (t a b -> m b) -> FixF (t a) -> m b
-condCataM p f a = f =<< condBimapM p return (condCataM p f) (outF a)
+condCataM :: (CondBifunctorM t,                            Monad m, Fixable a, Fixable b)
+          => (t a (FixF (t a)) -> Bool)                -> (t a b -> m b)                                               -> FixF (t a)   -> m b
+condCataM     p f     a =                           f =<<  condBimapM p return (condCataM p f) (outF a)
 
-condAnaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b) => (t a b -> Bool) -> (b -> m (t a b)) -> b -> m (FixF (t a))
-condAnaM p f a = (return . InF) =<< condBimapM p return (condAnaM p f) =<< f a
 
-condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c, Fixable d)
-          => (f c d -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
-condHyloM p f e g a = f =<< e =<< condBimapM p return (condHyloM p f e g) =<< g a
+condHyloM :: (CondBifunctorM t
+             ,CondBifunctorM f,                            Monad m, Fixable b, Fixable c, Fixable d)
+          => (f c d -> Bool)                           -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d))   -> d            -> m b
+condHyloM     p f e g a =                     f =<< e =<<  condBimapM p return (condHyloM p f e g)                                    =<< g a
 
-condParaM :: (CondBifunctorM t, Monad m, Fixable a)
-          => (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
-condParaM p f a = f =<< condBimapM p return (\ff -> do b <- condParaM p f ff; return (a,b)) (outF a)
 
-condApoM :: (CondBifunctorM t, Monad m, Fixable a)
-         => (t a (Either (FixF (t a)) b) -> Bool) -> (b -> m (t a (Either (FixF (t a)) b))) -> b -> m (FixF (t a))
-condApoM p f a = do
+condParaM :: (CondBifunctorM t,                            Monad m, Fixable a)
+          => (t a (FixF (t a)) -> Bool)                -> (t a (FixF (t a), b) -> m b)                                 -> FixF (t a)   -> m b
+condParaM     p f     a =                           f =<<  condBimapM p return
+                                                          (\ff -> do b <- condParaM p f ff; return (a,b))                                (outF a)
+
+
+condAnaM  :: (CondBifunctorM t,                            Monad m, Fixable a, Fixable b)
+          => (t a b -> Bool)                           -> (b -> m (t a b))                                             -> b            -> m (FixF (t a))
+condAnaM      p f     a =              (return . InF) =<< condBimapM p return (condAnaM p f)                                          =<< f a
+
+
+condApoM  :: (CondBifunctorM t,                            Monad m, Fixable a)
+          => (t a (Either (FixF (t a)) b) -> Bool)     -> (b -> m (t a (Either (FixF (t a)) b)))                       -> b            -> m (FixF (t a))
+condApoM      p f     a = do
   b <- f a
   c <- condBimapM p return j b
   return $ inF c
@@ -100,52 +141,6 @@ condAna  p f     a = runIdentity $ condAnaM  p   (return . f)                   
 condHylo p f e g a = runIdentity $ condHyloM p   (return . f) (return . e) (return . g) a
 condPara p f     a = runIdentity $ condParaM p   (return . f)                           a
 condApo  p f     a = runIdentity $ condApoM  p   (return . f)                           a
-
-{-
-
-instance Eq LLN where
-  (a `Mul` b) == (c `Mul` d) = ( (a == c) && (b == d) ) || ( (a == d) && (b == c) )
-  (a `Add` b) == (c `Add` d) = ( (a == c) && (b == d) ) || ( (a == d) && (b == c) )
-  N a == N b = a == b
-  a == b = show (reduce a) == show (reduce b)
-
-lli (a `Div` b) = reduce ( lli01 b `Div` lli01 a )
- where
-  lli01 x = x * U + W
-lli a = lli (a `Div` N 1)
-
-reduce (a `Mul` b) | a > b = b `Mul` a
-reduce (N 1 `Mul` U `Add` W) = N 1
-reduce (U `Pow` N 2) = N 1
-reduce (U `Mul` W `Add` W) = 0
-reduce (a `Mul` b) | a == b = a `Pow` N 2
-reduce (a `Mul` b `Pow` c) | a == b = a `Pow` (b `Add` N 1)
-reduce (N a `Add` N b) = N (a+b)
-reduce (N a `Mul` N b) = N (a*b)
-reduce (N a `Sub` N b) = N (a-b)
-reduce a = a
-
--}
-
-{-
-
-lli01(x) = (x*u+w)
-lli01(lli01(x)) = x
-
-(x*u+w)*u+w = x
-(x*u+w)*u+w = x*u*u + u*w + w
-(x*u+w)*u+w = x*1   + u*w + w
-(x*u+w)*u+w = x*1   + 0
-
-1*u+w = 1
-u*u = 1
-u*w + w = 0
-
-lli(a/b) = lli01(b) / lli01(a)
-
-
-
--}
 
 n :: Integer -> Term
 n x = InF $ N x
