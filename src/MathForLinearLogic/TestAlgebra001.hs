@@ -104,29 +104,29 @@ instance CondBifunctorM TermBF where
   condBimapM p f j U = return U
 
 
-condCataM :: (CondBifunctorM t,                            Monad m, Fixable a, Fixable b)
+condCataM :: (CondBifunctorM t,                            Monad m,               Fixable a, Fixable b)
           => (t a (FixF (t a)) -> Bool)                -> (t a b -> m b)                                               -> FixF (t a)   -> m b
 condCataM     p f     a =                           f =<<  condBimapM p return (condCataM p f) (outF a)
 
 
 condHyloM :: (CondBifunctorM t
-             ,CondBifunctorM f,                            Monad m, Fixable b, Fixable c, Fixable d)
+             ,CondBifunctorM f,                            Monad m,    Fixable b, Fixable c, Fixable d)
           => (f c d -> Bool)                           -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d))   -> d            -> m b
-condHyloM     p f e g a =                     f =<< e =<<  condBimapM p return (condHyloM p f e g)                                    =<< g a
+condHyloM     p f e g a =                     f =<< e =<<  condBimapM p return (condHyloM p f e g)                    =<< g a
 
 
-condParaM :: (CondBifunctorM t,                            Monad m, Fixable a)
+condParaM :: (CondBifunctorM t,                            Monad m,                          Fixable a)
           => (t a (FixF (t a)) -> Bool)                -> (t a (FixF (t a), b) -> m b)                                 -> FixF (t a)   -> m b
 condParaM     p f     a =                           f =<<  condBimapM p return
-                                                          (\ff -> do b <- condParaM p f ff; return (a,b))                                (outF a)
+                                                          (\fx -> do b <- condParaM p f fx; return (a,b))                (outF a)
 
 
-condAnaM  :: (CondBifunctorM t,                            Monad m, Fixable a, Fixable b)
+condAnaM  :: (CondBifunctorM t,                            Monad m,               Fixable a, Fixable b)
           => (t a b -> Bool)                           -> (b -> m (t a b))                                             -> b            -> m (FixF (t a))
-condAnaM      p f     a =              (return . InF) =<< condBimapM p return (condAnaM p f)                                          =<< f a
+condAnaM      p f     a =              (return . InF) =<< condBimapM p return (condAnaM p f)                          =<< f a
 
 
-condApoM  :: (CondBifunctorM t,                            Monad m, Fixable a)
+condApoM  :: (CondBifunctorM t,                            Monad m,                         Fixable a)
           => (t a (Either (FixF (t a)) b) -> Bool)     -> (b -> m (t a (Either (FixF (t a)) b)))                       -> b            -> m (FixF (t a))
 condApoM      p f     a = do
   b <- f a
