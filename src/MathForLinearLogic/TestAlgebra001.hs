@@ -83,7 +83,6 @@ condHyloM p f e g a = f =<< e =<< condBimapM p return (condHyloM p f e g) =<< g 
 
 condParaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b)
           => (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
--- condParaM p q f a = f =<< condBimapM p return (\b -> return (a,b)) =<< condBimapM q return (condParaM p q f) (outF a)
 condParaM p f a = f =<< condBimapM p return (\ff -> do b <- condParaM p f ff; return (a,b)) (outF a)
 
 condApoM :: (CondBifunctorM t, Monad m, Fixable a)
@@ -96,11 +95,11 @@ condApoM p f a = do
   j (Left  d) = return d
   j (Right d) = condApoM p f d
 
-condCata p   f     a = runIdentity $ condCataM p   (return . f)                           a
-condAna  p   f     a = runIdentity $ condAnaM  p   (return . f)                           a
-condHylo p   f e g a = runIdentity $ condHyloM p   (return . f) (return . e) (return . g) a
-condPara p   f     a = runIdentity $ condParaM p   (return . f)                           a
-condApo  p   f     a = runIdentity $ condApoM  p   (return . f)                           a
+condCata p f     a = runIdentity $ condCataM p   (return . f)                           a
+condAna  p f     a = runIdentity $ condAnaM  p   (return . f)                           a
+condHylo p f e g a = runIdentity $ condHyloM p   (return . f) (return . e) (return . g) a
+condPara p f     a = runIdentity $ condParaM p   (return . f)                           a
+condApo  p f     a = runIdentity $ condApoM  p   (return . f)                           a
 
 {-
 
