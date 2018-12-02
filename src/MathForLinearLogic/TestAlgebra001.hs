@@ -85,31 +85,21 @@ condParaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b)
           => (t a b -> Bool) -> (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
 condParaM p q f a = f =<< condBimapM p return (\b -> return (a,b)) =<< condBimapM q return (condParaM p q f) (outF a)
 
+condApoM :: (CondBifunctorM t, Monad m, Fixable a)
+         => (t a (Either (FixF (t a)) b) -> Bool) -> (b -> m (t a (Either (FixF (t a)) b))) -> b -> m (FixF (t a))
+condApoM p f a = do
+  b <- f a
+  c <- condBimapM p return j b
+  return $ inF c
+ where
+  j (Left  d) = return d
+  j (Right d) = condApoM p f d
+
 condCata p   f     a = runIdentity $ condCataM p   (return . f)                           a
 condAna  p   f     a = runIdentity $ condAnaM  p   (return . f)                           a
 condHylo p   f e g a = runIdentity $ condHyloM p   (return . f) (return . e) (return . g) a
 condPara p q f     a = runIdentity $ condParaM p q (return . f)                           a
-
-{-
-
-termParaM :: Monad m => (Term -> Bool) -> ((Term, Term) -> m Term) -> Term -> m Term
-termParaM p f a = termMapM p (termParaM p f) a >>= curry f a
-
-termApoM :: Monad m => (Term -> Bool) -> (Term -> m (Either Term Term)) -> Term -> m Term
-termApoM p f a = do
-  b <- f a
-  case b of
-    Left  c -> return c
-    Right d -> termMapM p (termApoM p f) d
-
-termCata p f   a = runIdentity $ termCataM p (return . f) a
-termAna  p f   a = runIdentity $ termAnaM  p (return . f) a
-termHylo p f g a = runIdentity $ termHyloM p (return . f) (return . g) a
-termPara p f   a = runIdentity $ termParaM p (return . f) a
-termApo  p f   a = runIdentity $ termApoM  p (return . f) a
--}
-
-
+condApo  p   f     a = runIdentity $ condApoM  p   (return . f)                           a
 
 {-
 
@@ -118,10 +108,6 @@ instance Eq LLN where
   (a `Add` b) == (c `Add` d) = ( (a == c) && (b == d) ) || ( (a == d) && (b == c) )
   N a == N b = a == b
   a == b = show (reduce a) == show (reduce b)
-
-infixr 7 `Add`
-infixr 8 `Mul`
-infixr 9 `Pow`
 
 lli (a `Div` b) = reduce ( lli01 b `Div` lli01 a )
  where
