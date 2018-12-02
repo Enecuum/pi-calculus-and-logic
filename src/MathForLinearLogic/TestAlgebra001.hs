@@ -81,7 +81,7 @@ condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c,
           => (f c d -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
 condHyloM p f e g a = f =<< e =<< condBimapM p return (condHyloM p f e g) =<< g a
 
-condParaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b)
+condParaM :: (CondBifunctorM t, Monad m, Fixable a)
           => (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
 condParaM p f a = f =<< condBimapM p return (\ff -> do b <- condParaM p f ff; return (a,b)) (outF a)
 
