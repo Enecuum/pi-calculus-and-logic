@@ -158,6 +158,7 @@ condApo  p f     a = runIdentity $ condApoM  p   (return . f)                   
 
 
 
+
 n :: Integer -> Term
 n x = InF $ N x
 
