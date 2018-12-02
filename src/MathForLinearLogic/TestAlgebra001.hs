@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies, IncoherentInstances #-}
+{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies, IncoherentInstances, TupleSections #-}
 
 module MathForLinearLogic.TestAlgebra001 where
 
@@ -82,8 +82,9 @@ condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c,
 condHyloM p f e g a = f =<< e =<< condBimapM p return (condHyloM p f e g) =<< g a
 
 condParaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b)
-          => (t a b -> Bool) -> (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
-condParaM p q f a = f =<< condBimapM p return (\b -> return (a,b)) =<< condBimapM q return (condParaM p q f) (outF a)
+          => (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
+-- condParaM p q f a = f =<< condBimapM p return (\b -> return (a,b)) =<< condBimapM q return (condParaM p q f) (outF a)
+condParaM p f a = f =<< condBimapM p return (\ff -> do b <- condParaM p f ff; return (a,b)) (outF a)
 
 condApoM :: (CondBifunctorM t, Monad m, Fixable a)
          => (t a (Either (FixF (t a)) b) -> Bool) -> (b -> m (t a (Either (FixF (t a)) b))) -> b -> m (FixF (t a))
@@ -98,7 +99,7 @@ condApoM p f a = do
 condCata p   f     a = runIdentity $ condCataM p   (return . f)                           a
 condAna  p   f     a = runIdentity $ condAnaM  p   (return . f)                           a
 condHylo p   f e g a = runIdentity $ condHyloM p   (return . f) (return . e) (return . g) a
-condPara p q f     a = runIdentity $ condParaM p q (return . f)                           a
+condPara p   f     a = runIdentity $ condParaM p   (return . f)                           a
 condApo  p   f     a = runIdentity $ condApoM  p   (return . f)                           a
 
 {-
@@ -189,7 +190,7 @@ test08 = InF $ foldr (\a b -> b `Mod` 1) U [1..5]
 --          => (t a b -> Bool) -> (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
 
 test09 :: Integer
-test09 = condPara (const True) (const True) f test08
+test09 = condPara (const True) f test08
  where
   f U = 1
   f ((a,b) `Mod` 1) = test07 a * b
