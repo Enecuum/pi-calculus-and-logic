@@ -104,30 +104,32 @@ instance CondBifunctorM TermBF where
   condBimapM p f j U = return U
 
 
-condCataM :: (CondBifunctorM t,                            Monad m,               Fixable a, Fixable b)
-          => (t a (FixF (t a)) -> Bool)                -> (t a b -> m b)                                               -> FixF (t a)   -> m b
-condCataM     p f     a =                           f =<<  condBimapM p return (condCataM p f) (outF a)
-
-
-condHyloM :: (CondBifunctorM t
-             ,CondBifunctorM f,                            Monad m,    Fixable b, Fixable c, Fixable d)
-          => (f c d -> Bool)                           -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d))   -> d            -> m b
-condHyloM     p f e g a =                     f =<< e =<<  condBimapM p return (condHyloM p f e g)                    =<< g a
-
-
-condParaM :: (CondBifunctorM t,                            Monad m,                          Fixable a)
+condParaM :: (CondBifunctorM t,                            Monad m,                            Fixable a)
           => (t a (FixF (t a)) -> Bool)                -> (t a (FixF (t a), b) -> m b)                                 -> FixF (t a)   -> m b
 condParaM     p f     a =                           f =<<  condBimapM p return
                                                           (\fx -> do b <- condParaM p f fx; return (a,b))                (outF a)
 
 
-condAnaM  :: (CondBifunctorM t,                            Monad m,               Fixable a, Fixable b)
-          => (t a b -> Bool)                           -> (b -> m (t a b))                                             -> b            -> m (FixF (t a))
-condAnaM      p f     a =              (return . InF) =<< condBimapM p return (condAnaM p f)                          =<< f a
+condCataM :: (CondBifunctorM t,                            Monad m,                 Fixable a, Fixable b)
+          => (t a (FixF (t a)) -> Bool)                -> (t a b -> m b)                                               -> FixF (t a)   -> m b
+condCataM     p f     a =                           f =<<  condBimapM p return (condCataM p f)                           (outF a)
 
 
-condApoM  :: (CondBifunctorM t,                            Monad m,                         Fixable a)
-          => (t a (Either (FixF (t a)) b) -> Bool)     -> (b -> m (t a (Either (FixF (t a)) b)))                       -> b            -> m (FixF (t a))
+condHyloM :: (CondBifunctorM t
+             ,CondBifunctorM f,                            Monad m,      Fixable b, Fixable c, Fixable d)
+          => (f c d -> Bool)                           -> (t a b -> m      b ) ->  (f c b  ->  m (t a b))
+                                                       -> (d     -> m (f c d))                                         -> d            -> m b
+condHyloM     p f e g a =                     f =<< e =<<  condBimapM p return (condHyloM p f e g)                    =<< g a
+
+
+
+condAnaM  :: (CondBifunctorM t,                            Monad m,                 Fixable a, Fixable b)
+          => (t a b -> Bool)                           -> (b     -> m (t a b))                                         -> b            -> m (FixF (t a))
+condAnaM      p f     a =              (return . InF) =<<  condBimapM p return (condAnaM p f)                         =<< f a
+
+
+condApoM  :: (CondBifunctorM t,                            Monad m,                            Fixable a)
+          => (t a (Either (FixF (t a)) b) -> Bool)     -> (b     -> m ( t a (Either (FixF (t a)) b) )   )              -> b            -> m (FixF (t a))
 condApoM      p f     a = do
   b <- f a
   c <- condBimapM p return j b
@@ -136,11 +138,25 @@ condApoM      p f     a = do
   j (Left  d) = return d
   j (Right d) = condApoM p f d
 
+
+
 condCata p f     a = runIdentity $ condCataM p   (return . f)                           a
 condAna  p f     a = runIdentity $ condAnaM  p   (return . f)                           a
 condHylo p f e g a = runIdentity $ condHyloM p   (return . f) (return . e) (return . g) a
 condPara p f     a = runIdentity $ condParaM p   (return . f)                           a
 condApo  p f     a = runIdentity $ condApoM  p   (return . f)                           a
+
+
+
+
+
+
+
+
+
+
+
+
 
 n :: Integer -> Term
 n x = InF $ N x
@@ -172,16 +188,8 @@ test07 :: FixF (TermBF Integer) -> Integer
 test07 (InF U) = 0
 test07 (InF (a `Mod` 1)) = test07 (InF a) + 1
 
---test08 :: TermBF Integer (FixF (TermBF Integer))
 test08 :: FixF (TermBF Integer)
 test08 = InF $ foldr (\a b -> b `Mod` 1) U [1..5]
-
-
--- condHyloM :: (CondBifunctorM t, CondBifunctorM f, Monad m, Fixable b, Fixable c, Fixable d) =>
---              (Int -> Bool) -> (t a b -> m b) -> (f c b -> m (t a b)) -> (d -> m (f c d)) -> d -> m b
-
--- condParaM :: (CondBifunctorM t, Monad m, Fixable a, Fixable b)
---          => (t a b -> Bool) -> (t a (FixF (t a)) -> Bool) -> (t a (FixF (t a), b) -> m b) -> FixF (t a) -> m b
 
 test09 :: Integer
 test09 = condPara (const True) f test08
