@@ -6,6 +6,7 @@ import Data.Functor.Identity
 import Control.Monad
 import GHC.TypeLits
 import Data.Proxy
+import Data.Dynamic
 
 
 
@@ -13,8 +14,12 @@ import Data.Proxy
 class CondBifunctorM t where
   type FirstPrototype t
   condBimapM :: ( Monad m, Fixable a, Fixable b, Fixable c, Fixable d
-                , Match a (FirstPrototype t) ~ 'True
+                -- , Match a (FirstPrototype t) ~ 'True,
                 -- , ToCDD "AllSymbols" (FirstPrototype t) a
+                -- PathDataToFunction2 (TypeFromRecord "Name" a -> a)
+                -- , ToCommDisjDict (FirstPrototype t)
+                -- , ToCommDisjDict a
+                , ToCommDisjDict a (ToCDD (FillPrototype (FirstPrototype t) a))
                 )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
@@ -25,6 +30,44 @@ condAna   p f     a = runIdentity $ condAnaM   p (return . f)                   
 condHylo  p f e g a = runIdentity $ condHyloM  p (return . f) (return . e) (return . g) a
 condPara  p f     a = runIdentity $ condParaM  p (return . f)                           a
 condApo   p f     a = runIdentity $ condApoM   p (return . f)                           a
+-}
+
+class ToCommDisjDict a b where
+  toCDD :: a -> b
+
+instance (TypeFromRecord a (Record a b) ~ b) =>  ToCommDisjDict (Record a b) (b -> Record a b) where
+  toCDD _ = Record
+
+instance (ToCommDisjDict a (c -> a), ToCommDisjDict b (d -> b)) => ToCommDisjDict (a :@ b) ( c -> (a :@ b) , d -> (a :@ b) ) where
+  toCDD a = ( CommDisj . Left . toCDD (fromCDL a) , CommDisj . Right . toCDD (fromCDR a) )
+
+instance ToCommDisjDict a () where
+  toCDD _ = ()
+
+type family ToCDD a where
+  ToCDD (Record a b) = b -> Record a b
+  ToCDD (a :@ b) = ( ToCDD a , ToCDD b )
+  ToCDD a = ()
+
+type family FillPrototype a b where
+  FillPrototype (Record a b) (Record a c) = Record a c
+  FillPrototype (a :@ b) (c :@ d) = FillPrototype a c :@ FillPrototype b d
+
+{-
+class ToCommDisjDict a where
+  toCDD :: a -> [Dynamic]
+
+instance Typeable (b -> Record a b) => ToCommDisjDict (Record a b) where
+  toCDD a = [toDyn $ f a]
+    where
+     f :: Record a b -> b -> Record a b
+     f _ = Record
+
+instance (ToCommDisjDict a, ToCommDisjDict b) => ToCommDisjDict (a :@ b) where
+  toCDD a = toCDD (fromCDL a) ++ toCDD (fromCDR a)
+
+instance ToCommDisjDict a where
+  toCDD _ = []
 -}
 
 
@@ -63,9 +106,15 @@ data TypeNotFound
 newtype a :@ b = CommDisj (Either a b)
 newtype Record (a :: Symbol) b = Record b
 
+fromCDL :: a :@ b -> a
+fromCDL = undefined
+
+fromCDR :: a :@ b -> b
+fromCDR = undefined
+
 type family TypeXOR a b where
-  TypeXOR (LeftP TypeNotFound) a = a
-  TypeXOR a (RightP TypeNotFound) = a
+--  TypeXOR (LeftP TypeNotFound) a = a
+--  TypeXOR a (RightP TypeNotFound) = a
   TypeXOR TypeNotFound a = a
   TypeXOR a TypeNotFound = a
   TypeXOR a b = TypeNotFound
@@ -75,6 +124,7 @@ type family TypeFromRecord (a :: Symbol) b where
   TypeFromRecord a (b :@ c) = TypeXOR (TypeFromRecord a b) (TypeFromRecord a c)
   TypeFromRecord a  b       = TypeNotFound
 
+{-
 data IdentP
 data LeftP a
 data RightP a
@@ -115,6 +165,7 @@ instance PathDataToFunction (a -> c) => PathDataToFunction (a -> c :@ d) where
 
 instance PathDataToFunction (a -> e) => PathDataToFunction (a -> (c :@ d) :@ e) where
   pathDataToFunction (RightP a) = CommDisj . Right . pathDataToFunction a
+-}
 
 {-
 type family PathToFunction a b c d where
