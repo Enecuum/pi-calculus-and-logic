@@ -20,14 +20,30 @@ class CondBifunctorM t where
                 -- , ToCommDisjDict (FirstPrototype t)
                 -- , ToCommDisjDict a
                 --, ToCommDisjDict a (ToCDD (FillPrototype (FirstPrototype t) a))
-                , Typeable (TypeFromRecord (GetRecordNameByIndex 0 (FirstPrototype t) "NotFound") a)
-                , Typeable (TypeFromRecord (GetRecordNameByIndex 1 (FirstPrototype t) "NotFound") a)
-                , Typeable (TypeFromRecord (GetRecordNameByIndex 2 (FirstPrototype t) "NotFound") a)
+                , ToCDD (GetRecordNameByIndex 0 (FirstPrototype t) "NotFound") a
+                , ToCDD (GetRecordNameByIndex 1 (FirstPrototype t) "NotFound") a
                 -- , Typeable (TypeFromRecord "Name" a)
-                , Typeable a
-                , ToCommDisjDict a
                 )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
+
+class ToCDD (a :: Symbol) c where
+  toCDD :: Proxy a -> TypeFromRecord a c -> c
+  toCDD = undefined
+
+instance ToCDD a (Record a b) where
+  toCDD _ b = Record b
+
+instance (TypeFromRecord a c ~ TypeNotFound) => ToCDD a (Record a b :@ c) where
+  toCDD _ b = CommDisj $ Left  $ Record b
+
+instance (ToCDD a c, TypeFromRecord a (d :@ e) ~ TypeNotFound) => ToCDD a (c :@ (d :@ e)) where
+  toCDD a b = CommDisj $ Left  $ toCDD a b
+
+instance (ToCDD a d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a (c :@ d) where
+  toCDD a b = CommDisj $ Right $ toCDD a b
+
+fromCDD = undefined
+
 
 type family CountRecords a where
   CountRecords (Record a b) = 1
@@ -70,6 +86,7 @@ type family FillPrototype a b where
   FillPrototype (a :@ b) (c :@ d) = FillPrototype a c :@ FillPrototype b d
 -}
 
+{-
 class ToCommDisjDict a where
   toCDD :: a -> [Dynamic]
 
@@ -84,6 +101,7 @@ instance (ToCommDisjDict a, ToCommDisjDict b) => ToCommDisjDict (a :@ b) where
 
 instance ToCommDisjDict a where
   toCDD _ = []
+-}
 
 
 
@@ -128,8 +146,6 @@ fromCDR :: a :@ b -> b
 fromCDR = undefined
 
 type family TypeXOR a b where
---  TypeXOR (LeftP TypeNotFound) a = a
---  TypeXOR a (RightP TypeNotFound) = a
   TypeXOR TypeNotFound a = a
   TypeXOR a TypeNotFound = a
   TypeXOR a b = TypeNotFound
@@ -207,8 +223,8 @@ class ToCDD (a :: Symbol) b c where
   toCDD :: Proxy a -> b -> c
   toCDD = undefined
 
-instance (ToCDD a (TypeFromRecord a c) c) => ToCDD "AllSymbols" (Record a b) c
-instance (ToCDD a (TypeFromRecord a e) e, ToCDD c (TypeFromRecord c e) e) => ToCDD "AllSymbols" (Record a b :@ Record c d) e
+--instance (ToCDD a (TypeFromRecord a c) c) => ToCDD "AllSymbols" (Record a b) c
+--instance (ToCDD a (TypeFromRecord a e) e, ToCDD c (TypeFromRecord c e) e) => ToCDD "AllSymbols" (Record a b :@ Record c d) e
 
 instance ToCDD a b (Record a b) where
   toCDD _ b = Record b
@@ -222,8 +238,8 @@ instance (ToCDD a b c, TypeFromRecord a d ~ TypeNotFound) => ToCDD a b (c :@ (d 
 instance (ToCDD a b d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a b (c :@ d) where
   toCDD a b = CommDisj $ Right $ toCDD a b
 
--}
 fromCDD = undefined
+-}
 
 
 
