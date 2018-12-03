@@ -45,7 +45,7 @@ test01 :: ExprA
 test01 = Scop "test" Unit
 
 test02 :: ExprA
-test02 = condBimap (const True) (\(CommDisj (Right (Record a))) -> CommDisj (Right (Record (a++"best")))) id test01
+test02 = condBimapP name (const True) (++"best") id test01
 
 
 

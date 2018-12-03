@@ -82,6 +82,8 @@ condHylo  p f e g a = runIdentity $ condHyloM  p (return . f) (return . e) (retu
 condPara  p f     a = runIdentity $ condParaM  p (return . f)                           a
 condApo   p f     a = runIdentity $ condApoM   p (return . f)                           a
 
+condBimapP proxy p f j a = condBimap p (toCDD proxy . f . fromCDD proxy) j a
+
 
 
 newtype FixF f = InF ( f (FixF f) )
