@@ -28,7 +28,7 @@ data ExprBF a b
 
 instance CondBifunctorM ExprBF where
   type FirstPrototype ExprBF = (R "Value" AnyType :@ R "Name" AnyType)
-  condBimapM p f j o@(Scop a b) | p o = do c <- f (toCDD name a); d <- j (inF b); return $ Scop (fromCDD name c) (outF d)
+  condBimapM p f j o@(Scop a b) | p o = do c <- f ( pathDataToFunction (pathToData (undefined :: PathFromRecord "Name" (FirstPrototype ExprBF))) a ); d <- j (inF b); return $ Scop (fromCDD name c) (outF d)
   condBimapM p f j o@(Comm a b) | p o = do c <- j (inF        a); d <- j (inF b); return $ Comm (outF c) (outF d)
   condBimapM p f j o@(Serv a  ) | p o = do b <- j (inF        a);                 return $ Serv $ outF b
   condBimapM p f j o = return $ cast o

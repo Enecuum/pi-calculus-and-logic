@@ -14,7 +14,7 @@ class CondBifunctorM t where
   type FirstPrototype t
   condBimapM :: ( Monad m, Fixable a, Fixable b, Fixable c, Fixable d
                 , Match a (FirstPrototype t) ~ 'True
-                , ToCDD "AllSymbols" (FirstPrototype t) a
+                -- , ToCDD "AllSymbols" (FirstPrototype t) a
                 )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
@@ -64,6 +64,8 @@ newtype a :@ b = CommDisj (Either a b)
 newtype Record (a :: Symbol) b = Record b
 
 type family TypeXOR a b where
+  TypeXOR (LeftP TypeNotFound) a = a
+  TypeXOR a (RightP TypeNotFound) = a
   TypeXOR TypeNotFound a = a
   TypeXOR a TypeNotFound = a
   TypeXOR a b = TypeNotFound
@@ -73,6 +75,68 @@ type family TypeFromRecord (a :: Symbol) b where
   TypeFromRecord a (b :@ c) = TypeXOR (TypeFromRecord a b) (TypeFromRecord a c)
   TypeFromRecord a  b       = TypeNotFound
 
+data IdentP
+data LeftP a
+data RightP a
+
+fromLeftP :: LeftP a -> a
+fromLeftP = undefined
+
+fromRightP :: RightP a -> a
+fromRightP = undefined
+
+type family PathFromRecord a b where
+  PathFromRecord a (Record a b) = IdentP
+  PathFromRecord a (b :@ c) = TypeXOR (LeftP (PathFromRecord a b)) (RightP (PathFromRecord a c))
+  PathFromRecord a  b       = TypeNotFound
+
+data Path = IdentP | LeftP Path | RightP Path
+
+class PathToData a where
+  pathToData :: a -> Path
+
+instance PathToData IdentP where
+  pathToData _ = IdentP
+
+instance PathToData a => PathToData (LeftP a) where
+  pathToData a = LeftP $ pathToData $ fromLeftP a
+
+instance PathToData a => PathToData (RightP a) where
+  pathToData a = RightP $ pathToData $ fromRightP a
+
+class PathDataToFunction a where
+  pathDataToFunction :: Path -> a
+
+instance PathDataToFunction (a -> Record b a) where
+  pathDataToFunction IdentP = Record
+
+instance PathDataToFunction (a -> c) => PathDataToFunction (a -> c :@ d) where
+  pathDataToFunction (LeftP a) = CommDisj . Left . pathDataToFunction a
+
+instance PathDataToFunction (a -> e) => PathDataToFunction (a -> (c :@ d) :@ e) where
+  pathDataToFunction (RightP a) = CommDisj . Right . pathDataToFunction a
+
+{-
+type family PathToFunction a b c d where
+  PathToFunction IdentP b c d = (b -> Record c b)
+  PathToFunction (Left a) b c d = (b -> PathToFunction a 
+-}
+
+{-
+class ToCDD a b | a -> b where
+  toCDD :: a -> b
+
+instance ToCDD IdentP (a -> Record b a) where
+  toCDD _ = Record
+
+instance ToCDD a (a -> c) => ToCDD (LeftP a) (a -> c :@ d) where
+  toCDD a = CommDisj . Left . toCDD (fromLeftP a)
+
+instance ToCDD a (a -> d) => ToCDD (RightP a) (a -> c :@ d) where
+  toCDD a = CommDisj . Right . toCDD (fromRightP a)
+-}
+
+{-
 class ToCDD (a :: Symbol) b c where
   toCDD :: Proxy a -> b -> c
   toCDD = undefined
@@ -92,18 +156,19 @@ instance (ToCDD a b c, TypeFromRecord a d ~ TypeNotFound) => ToCDD a b (c :@ (d 
 instance (ToCDD a b d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a b (c :@ d) where
   toCDD a b = CommDisj $ Right $ toCDD a b
 
+-}
 fromCDD = undefined
 
 
 
 
+{-
 condParaM :: (CondBifunctorM t,                            Monad m,                            Fixable a,  Match a (FirstPrototype t) ~ 'True
                 , ToCDD "AllSymbols" (FirstPrototype t) a)
           => (t a (FixF (t a)) -> Bool)                -> (t a (FixF (t a), b) -> m b)                                 -> FixF (t a)   -> m b
 condParaM     p f     a =                           f =<<  condBimapM p return
                                                           (\fx -> do b <- condParaM p f fx; return (a,b))                (outF a)
 
-{-
 condCataM :: (CondBifunctorM t,                            Monad m,                 Fixable a, Fixable b)
           => (t a (FixF (t a)) -> Bool)                -> (t a b -> m b)                                               -> FixF (t a)   -> m b
 condCataM     p f     a =                           f =<<  condBimapM p return (condCataM p f)                           (outF a)
