@@ -25,8 +25,8 @@ class CondBifunctorM t where
   condBimapM :: ( Monad m, Fixable a, Fixable b, Fixable c, Fixable d, TOCDD(t,a,c) )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
-tocdd :: forall a c . ToCDD a c => TypeFromRecord a c -> c
-tocdd = toCDD (Proxy @a)
+to :: forall a c . ToCDD a c => TypeFromRecord a c -> c
+to = toCDD (Proxy @a)
 
 class ToCDD (a :: Symbol) c where
   toCDD :: Proxy a -> TypeFromRecord a c -> c
@@ -47,8 +47,8 @@ instance (ToCDD a d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a (c :@ d) wher
 instance ToCDD "NotFound" a
 
 
-fromcdd :: forall a b . FromCDD a b => b -> TypeFromRecord a b
-fromcdd = fromCDD (Proxy @a)
+fr :: forall a b . FromCDD a b => b -> TypeFromRecord a b
+fr = fromCDD (Proxy @a)
 
 class FromCDD (a :: Symbol) b where
   fromCDD :: Proxy a -> b -> TypeFromRecord a b

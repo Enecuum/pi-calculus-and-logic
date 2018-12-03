@@ -5,6 +5,7 @@ module PiCalculusClassic.Expr where
 import Control.Morphisms.Prelude
 import Data.Proxy
 import Data.Dynamic
+import Prelude hiding (to)
 
 type R a b = Record a b
 type T a b = TypeFromRecord a b
@@ -27,14 +28,12 @@ deriving instance Show ExprA
 
 instance CondBifunctorM ExprBF where
   type FirstPrototype ExprBF = (R "Value" AnyType :@ R "Name" AnyType)
-  condBimapM p f j o@(Value a) | p o = do b <- f (tocdd @"Value" a); return $ Value (fromcdd @"Value" b)
-  condBimapM p f j o@(Send a b c) | p o = do d <- f (tocdd @"Name" a); e <- f (tocdd @"Name" b); g <- j (inF c)
-                                             return $ Send (fromcdd @"Name" d) (fromcdd @"Name" e) (outF g)
-  condBimapM p f j o@(Recv a b c) | p o = do d <- f (tocdd @"Name" a); e <- f (tocdd @"Name" b); g <- j (inF c)
-                                             return $ Recv (fromcdd @"Name" d) (fromcdd @"Name" e) (outF g)
-  condBimapM p f j o@(Scop a b) | p o = do c <- f (tocdd @"Name" a); d <- j (inF b); return $ Scop (fromcdd @"Name" c) (outF d)
-  condBimapM p f j o@(Comm a b) | p o = do c <- j (inF        a); d <- j (inF b); return $ Comm (outF c) (outF d)
-  condBimapM p f j o@(Serv a  ) | p o = do b <- j (inF        a);                 return $ Serv $ outF b
+  condBimapM p f j o@(Value a)    | p o = do b <- f (to @"Value" a); return $ Value (fr @"Value" b)
+  condBimapM p f j o@(Send a b c) | p o = do d <- f (to @"Name" a); e <- f (to @"Name" b); g <- j (inF c); return $ Send (fr @"Name" d) (fr @"Name" e) (outF g)
+  condBimapM p f j o@(Recv a b c) | p o = do d <- f (to @"Name" a); e <- f (to @"Name" b); g <- j (inF c); return $ Recv (fr @"Name" d) (fr @"Name" e) (outF g)
+  condBimapM p f j o@(Scop a b)   | p o = do c <- f (to @"Name" a);                        d <- j (inF b); return $ Scop (fr @"Name" c) (outF d)
+  condBimapM p f j o@(Comm a b)   | p o = do                               c <- j (inF a); d <- j (inF b); return $ Comm (outF c) (outF d)
+  condBimapM p f j o@(Serv a  )   | p o = do                                               b <- j (inF a); return $ Serv $ outF b
   condBimapM p f j o = return $ cast o
    where
     cast :: ExprBF a b -> ExprBF c d
