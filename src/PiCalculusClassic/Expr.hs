@@ -1,8 +1,15 @@
-{-# LANGUAGE DataKinds, TypeOperators #-}
+{-# LANGUAGE DataKinds, TypeOperators, TypeFamilies #-}
 
 module PiCalculusClassic.Expr where
 
 import Control.Morphisms.Prelude
+import Data.Proxy
+
+name :: Proxy "Name"
+name =  Proxy
+
+value :: Proxy "Value"
+value =  Proxy
 
 type R a b = Record a b
 type T a b = TypeFromRecord a b
@@ -20,9 +27,10 @@ data ExprBF a b
    | Serv (OutF b)
 
 instance CondBifunctorM ExprBF where
-  -- condBimapM p f j o@(Scop a b) | p o = do c <- f      a ; d <- j (inF b); return $ Comm       c  (outF d)
-  condBimapM p f j o@(Comm a b) | p o = do c <- j (inF a); d <- j (inF b); return $ Comm (outF c) (outF d)
-  condBimapM p f j o@(Serv a  ) | p o = do b <- j (inF a);                 return $ Serv $ outF b
+  type FirstPrototype ExprBF = (R "Value" AnyType :@ R "Name" AnyType)
+  condBimapM p f j o@(Scop a b) | p o = do c <- f (toCDD name a); d <- j (inF b); return $ Scop (fromCDD name c) (outF d)
+  condBimapM p f j o@(Comm a b) | p o = do c <- j (inF        a); d <- j (inF b); return $ Comm (outF c) (outF d)
+  condBimapM p f j o@(Serv a  ) | p o = do b <- j (inF        a);                 return $ Serv $ outF b
   condBimapM p f j o = return $ cast o
    where
     cast :: ExprBF a b -> ExprBF c d

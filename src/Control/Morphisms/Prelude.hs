@@ -5,19 +5,27 @@ module Control.Morphisms.Prelude where
 import Data.Functor.Identity
 import Control.Monad
 import GHC.TypeLits
+import Data.Proxy
 
 
 
 
 class CondBifunctorM t where
-  condBimapM :: (Monad m, Fixable a, Fixable b, Fixable c, Fixable d) => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
+  type FirstPrototype t
+  condBimapM :: ( Monad m, Fixable a, Fixable b, Fixable c, Fixable d
+                , Match a (FirstPrototype t) ~ 'True
+                , ToCDD "AllSymbols" (FirstPrototype t) a
+                )
+             => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
+{-
 condBimap p f j   a = runIdentity $ condBimapM p (return . f) (return . j)              a
 condCata  p f     a = runIdentity $ condCataM  p (return . f)                           a
 condAna   p f     a = runIdentity $ condAnaM   p (return . f)                           a
 condHylo  p f e g a = runIdentity $ condHyloM  p (return . f) (return . e) (return . g) a
 condPara  p f     a = runIdentity $ condParaM  p (return . f)                           a
 condApo   p f     a = runIdentity $ condApoM   p (return . f)                           a
+-}
 
 
 
@@ -44,6 +52,11 @@ instance {-# OVERLAPPABLE #-} (OutF q ~ q) => Fixable q where
   outF q = q
 
 
+data AnyType
+
+type family Match a b where
+  Match AnyType a = 'True
+  
 
 
 data TypeNotFound
@@ -60,15 +73,37 @@ type family TypeFromRecord (a :: Symbol) b where
   TypeFromRecord a (b :@ c) = TypeXOR (TypeFromRecord a b) (TypeFromRecord a c)
   TypeFromRecord a  b       = TypeNotFound
 
+class ToCDD (a :: Symbol) b c where
+  toCDD :: Proxy a -> b -> c
+  toCDD = undefined
+
+instance (ToCDD a (TypeFromRecord a c) c) => ToCDD "AllSymbols" (Record a b) c
+instance (ToCDD a (TypeFromRecord a e) e, ToCDD c (TypeFromRecord c e) e) => ToCDD "AllSymbols" (Record a b :@ Record c d) e
+
+instance ToCDD a b (Record a b) where
+  toCDD _ b = Record b
+
+instance ToCDD a b (Record a b :@ c) where
+  toCDD _ b = CommDisj $ Left  $ Record b
+
+instance (ToCDD a b c, TypeFromRecord a d ~ TypeNotFound) => ToCDD a b (c :@ (d :@ e)) where
+  toCDD a b = CommDisj $ Left  $ toCDD a b
+
+instance (ToCDD a b d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a b (c :@ d) where
+  toCDD a b = CommDisj $ Right $ toCDD a b
+
+fromCDD = undefined
 
 
 
-condParaM :: (CondBifunctorM t,                            Monad m,                            Fixable a)
+
+condParaM :: (CondBifunctorM t,                            Monad m,                            Fixable a,  Match a (FirstPrototype t) ~ 'True
+                , ToCDD "AllSymbols" (FirstPrototype t) a)
           => (t a (FixF (t a)) -> Bool)                -> (t a (FixF (t a), b) -> m b)                                 -> FixF (t a)   -> m b
 condParaM     p f     a =                           f =<<  condBimapM p return
                                                           (\fx -> do b <- condParaM p f fx; return (a,b))                (outF a)
 
-
+{-
 condCataM :: (CondBifunctorM t,                            Monad m,                 Fixable a, Fixable b)
           => (t a (FixF (t a)) -> Bool)                -> (t a b -> m b)                                               -> FixF (t a)   -> m b
 condCataM     p f     a =                           f =<<  condBimapM p return (condCataM p f)                           (outF a)
@@ -96,6 +131,7 @@ condApoM      p f     a = do
  where
   j (Left  d) = return d
   j (Right d) = condApoM p f d
+-}
 
 
 
