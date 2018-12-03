@@ -19,9 +19,24 @@ class CondBifunctorM t where
                 -- PathDataToFunction2 (TypeFromRecord "Name" a -> a)
                 -- , ToCommDisjDict (FirstPrototype t)
                 -- , ToCommDisjDict a
-                , ToCommDisjDict a (ToCDD (FillPrototype (FirstPrototype t) a))
+                --, ToCommDisjDict a (ToCDD (FillPrototype (FirstPrototype t) a))
+                , Typeable (TypeFromRecord (GetRecordNameByIndex 0 (FirstPrototype t) "NotFound") a)
+                , Typeable (TypeFromRecord (GetRecordNameByIndex 1 (FirstPrototype t) "NotFound") a)
+                , Typeable (TypeFromRecord (GetRecordNameByIndex 2 (FirstPrototype t) "NotFound") a)
+                -- , Typeable (TypeFromRecord "Name" a)
+                , Typeable a
+                , ToCommDisjDict a
                 )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
+
+type family CountRecords a where
+  CountRecords (Record a b) = 1
+  CountRecords (a :@ b) = CountRecords a + CountRecords b
+
+type family GetRecordNameByIndex (a :: Nat) b c where
+  GetRecordNameByIndex 0 (Record a b) c = a
+  GetRecordNameByIndex n (a :@ b) c = GetRecordNameByIndex n a (GetRecordNameByIndex (n - CountRecords a) b "NotFound")
+  GetRecordNameByIndex n a b = b
 
 {-
 condBimap p f j   a = runIdentity $ condBimapM p (return . f) (return . j)              a
@@ -32,6 +47,7 @@ condPara  p f     a = runIdentity $ condParaM  p (return . f)                   
 condApo   p f     a = runIdentity $ condApoM   p (return . f)                           a
 -}
 
+{-
 class ToCommDisjDict a b where
   toCDD :: a -> b
 
@@ -52,8 +68,8 @@ type family ToCDD a where
 type family FillPrototype a b where
   FillPrototype (Record a b) (Record a c) = Record a c
   FillPrototype (a :@ b) (c :@ d) = FillPrototype a c :@ FillPrototype b d
+-}
 
-{-
 class ToCommDisjDict a where
   toCDD :: a -> [Dynamic]
 
@@ -68,7 +84,6 @@ instance (ToCommDisjDict a, ToCommDisjDict b) => ToCommDisjDict (a :@ b) where
 
 instance ToCommDisjDict a where
   toCDD _ = []
--}
 
 
 

@@ -4,6 +4,7 @@ module PiCalculusClassic.Expr where
 
 import Control.Morphisms.Prelude
 import Data.Proxy
+import Data.Dynamic
 
 name :: Proxy "Name"
 name =  Proxy
@@ -28,7 +29,7 @@ data ExprBF a b
 
 instance CondBifunctorM ExprBF where
   type FirstPrototype ExprBF = (R "Value" AnyType :@ R "Name" AnyType)
-  condBimapM p f j o@(Scop a b) | p o = do c <- f ( snd (toCDD (t f)) a ); d <- j (inF b); return $ Scop (fromCDD name c) (outF d)
+  condBimapM p f j o@(Scop a b) | p o = do c <- f ( fromDyn (toCDD (t f) !! 1) undefined a ); d <- j (inF b); return $ Scop (fromCDD name c) (outF d)
    where
     t :: (a -> b) -> a
     t = undefined
