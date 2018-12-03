@@ -28,6 +28,7 @@ class CondBifunctorM t where
 
 class ToCDD (a :: Symbol) c where
   toCDD :: Proxy a -> TypeFromRecord a c -> c
+  toCDD = undefined
 
 instance ToCDD a (Record a b) where
   toCDD _ b = Record b
@@ -41,9 +42,12 @@ instance (ToCDD a c, TypeFromRecord a (d :@ e) ~ TypeNotFound) => ToCDD a (c :@ 
 instance (ToCDD a d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a (c :@ d) where
   toCDD a b = CommDisj $ Right $ toCDD a b
 
+instance ToCDD "NotFound" a
+
 
 class FromCDD (a :: Symbol) b where
   fromCDD :: Proxy a -> b -> TypeFromRecord a b
+  fromCDD = undefined
 
 instance FromCDD a (Record a b) where
   fromCDD _ (Record a) = a
@@ -56,6 +60,8 @@ instance (FromCDD a c, TypeFromRecord a (d :@ e) ~ TypeNotFound) => FromCDD a (c
 
 instance (FromCDD a d, TypeFromRecord a c ~ TypeNotFound) => FromCDD a (c :@ d) where
   fromCDD a (CommDisj (Right b)) = fromCDD a b
+
+instance FromCDD "NotFound" a
 
 
 
