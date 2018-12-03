@@ -12,8 +12,12 @@ import Data.Dynamic
 #define TOCDD(t,a,c) \
     ToCDD (GetRecordNameByIndex 0 (FirstPrototype t) "NotFound") a \
   , ToCDD (GetRecordNameByIndex 1 (FirstPrototype t) "NotFound") a \
+  , ToCDD (GetRecordNameByIndex 2 (FirstPrototype t) "NotFound") a \
+  , ToCDD (GetRecordNameByIndex 3 (FirstPrototype t) "NotFound") a \
   , FromCDD (GetRecordNameByIndex 0 (FirstPrototype t) "NotFound") c \
   , FromCDD (GetRecordNameByIndex 1 (FirstPrototype t) "NotFound") c \
+  , FromCDD (GetRecordNameByIndex 2 (FirstPrototype t) "NotFound") c \
+  , FromCDD (GetRecordNameByIndex 3 (FirstPrototype t) "NotFound") c \
 
 
 class CondBifunctorM t where
