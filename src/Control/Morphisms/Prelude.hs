@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies, IncoherentInstances, TupleSections, TypeOperators, DataKinds, CPP #-}
+{-# LANGUAGE GADTs, ExistentialQuantification, FlexibleInstances, StandaloneDeriving, UndecidableInstances, TypeFamilies, AllowAmbiguousTypes, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies, IncoherentInstances, TupleSections, TypeOperators, DataKinds, CPP, TypeApplications, ScopedTypeVariables, AllowAmbiguousTypes, RankNTypes #-}
 
 module Control.Morphisms.Prelude where
 
@@ -25,6 +25,8 @@ class CondBifunctorM t where
   condBimapM :: ( Monad m, Fixable a, Fixable b, Fixable c, Fixable d, TOCDD(t,a,c) )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
+tocdd :: forall a c . ToCDD a c => TypeFromRecord a c -> c
+tocdd = toCDD (Proxy @a)
 
 class ToCDD (a :: Symbol) c where
   toCDD :: Proxy a -> TypeFromRecord a c -> c
@@ -44,6 +46,9 @@ instance (ToCDD a d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a (c :@ d) wher
 
 instance ToCDD "NotFound" a
 
+
+fromcdd :: forall a b . FromCDD a b => b -> TypeFromRecord a b
+fromcdd = fromCDD (Proxy @a)
 
 class FromCDD (a :: Symbol) b where
   fromCDD :: Proxy a -> b -> TypeFromRecord a b
@@ -82,7 +87,10 @@ condHylo  p f e g a = runIdentity $ condHyloM  p (return . f) (return . e) (retu
 condPara  p f     a = runIdentity $ condParaM  p (return . f)                           a
 condApo   p f     a = runIdentity $ condApoM   p (return . f)                           a
 
-condBimapP proxy p f j a = condBimap p (toCDD proxy . f . fromCDD proxy) j a
+condBimapP
+  :: forall s t b a c d  . ( KnownSymbol s, CondBifunctorM t, Fixable b, Fixable a, Fixable c, Fixable d, ToCDD s c, FromCDD s b, TOCDD(t,b,c) )
+  => (t b a -> Bool) -> (TypeFromRecord s b -> TypeFromRecord s c) -> (a -> d) -> t b a -> t c d
+condBimapP p f j a = condBimap p (toCDD (Proxy @s) . f . fromCDD (Proxy @s)) j a
 
 
 
