@@ -14,10 +14,12 @@ import Data.Dynamic
   , ToCDD (GetRecordNameByIndex 1 (FirstPrototype t) "NotFound") a \
   , ToCDD (GetRecordNameByIndex 2 (FirstPrototype t) "NotFound") a \
   , ToCDD (GetRecordNameByIndex 3 (FirstPrototype t) "NotFound") a \
+  , ToCDD (GetRecordNameByIndex 4 (FirstPrototype t) "NotFound") a \
   , FromCDD (GetRecordNameByIndex 0 (FirstPrototype t) "NotFound") c \
   , FromCDD (GetRecordNameByIndex 1 (FirstPrototype t) "NotFound") c \
   , FromCDD (GetRecordNameByIndex 2 (FirstPrototype t) "NotFound") c \
   , FromCDD (GetRecordNameByIndex 3 (FirstPrototype t) "NotFound") c \
+  , FromCDD (GetRecordNameByIndex 4 (FirstPrototype t) "NotFound") c \
 
 
 class CondBifunctorM t where
@@ -25,11 +27,17 @@ class CondBifunctorM t where
   condBimapM :: ( Monad m, Fixable a, Fixable b, Fixable c, Fixable d, TOCDD(t,a,c) )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
-data AddFixBF (a :: Symbol) b c d = AddFixBF ( b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))) d )
+--data AddFixBF (a :: Symbol) fix b c d = AddFixBF ( b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))  ) d )
 
-deriving instance (Show (b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))) d)
+data AddFixBF (a :: Symbol) fix b c d = AddFixBF ( b (c :@ Record a (GetFixType a fix b c d)  ) d )
+
+type family GetFixType (a :: Symbol) fix b c d where
+  GetFixType a FixType b c d = FixF (FlipBF a b (c :@ Record "Flipped" d))
+  GetFixType a other b c d = other
+
+deriving instance (Show (b (c :@ Record a (GetFixType a fix b c d)) d)
                   )
-   => Show (AddFixBF a b c d)
+   => Show (AddFixBF a fix b c d)
 
 data FlipBF (a :: Symbol) (b :: * -> * -> *) c d = FlipBF ( b c d )
  deriving (Show)
@@ -115,22 +123,30 @@ newtype FixF f = InF ( f (FixF f) )
 instance Show (f (FixF f)) => Show (FixF f) where
   show (InF a) = show a
 
-data UNFLIPBF (a :: Symbol) (b :: * -> * -> *) c d
-
 type family UnFlipBF a b c d where
-  -- UnFlipBF a b (c :@ Record "Flipped" e) (FixF (UNFLIPBF a b (c :@ Record "Flipped" e))) = b (c :@ Record a FixType ) e
-  -- UnFlipBF a b (c :@ Record "Flipped" e) (FixF (UNFLIPBF f g h)) = b (c :@ Record a (FixF (UNFLIPBF f g h))) e
   UnFlipBF a b (c :@ Record "Flipped" e) d = b (c :@ Record a d) e
 
 -- data AddFixBF (a :: Symbol) b c d = AddFixBF ( b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))) d )
 
+-- data AddFixBF (a :: Symbol) fix b c d = AddFixBF ( b (c :@ Record a (GetFixType a fix b c d)  ) d )
+
 type family (OutF a) where
   -- OutF (FixF (FlipBF a b c)) = UnFlipBF a b c (FixF (UNFLIPBF a b c))
-  OutF (FixF (AddFixBF a b c)) =
-             b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a b c))))))
-             (FixF (b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a b c))))))))
 
-  OutF (FixF (FlipBF a b c)) = UnFlipBF a b c (FixF (FlipBF a b c))
+{-
+  OutF (FixF (AddFixBF a fix b c)) =
+             b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a fix b c))))))
+             (FixF (b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a fix b c))))))))
+-}
+
+{-
+  OutF (FixF (AddFixBF a FixType b c)) =
+             b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a FixType b c))))))
+             (FixF (b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a FixType b c))))))))
+-}
+
+ -- OutF (FixF (FlipBF a b c)) = UnFlipBF a b c (FixF (FlipBF a b c))
+  OutF (FixF (FlipBF a b c)) = b (c :@ Record a (FixF (FlipBF a b c))) (FixF (b (c :@ Record a (FixF (FlipBF a b c)))))
   OutF (FixF f) = f (FixF f)
   OutF a = a
 
@@ -169,14 +185,15 @@ fromCDR :: a :@ b -> b
 fromCDR = undefined
 
 type family TypeXOR a b where
-  TypeXOR TypeNotFound a = a
   TypeXOR a TypeNotFound = a
+  TypeXOR TypeNotFound a = a
   TypeXOR a b = TypeNotFound
 
 type family TypeFromRecord (a :: Symbol) b where
   TypeFromRecord a (Record a b) = b
   TypeFromRecord a (b :@ c) = TypeXOR (TypeFromRecord a b) (TypeFromRecord a c)
   TypeFromRecord a  b       = TypeNotFound
+  --TypeFromRecord a  b       = (Proxy a,b)
 
 
 
