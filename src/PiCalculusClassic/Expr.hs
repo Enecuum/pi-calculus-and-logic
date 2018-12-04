@@ -22,10 +22,11 @@ data ExprBF a b
    | Scop { newChannelName :: (T "Name" a), process :: OutF b }
    | OutF b `Comm` OutF b
    | Serv (OutF b)
-   -- | Test (OutF (T "Test" a))
+   | Test (OutF (T "Test" a))
 
 deriving instance Show Expr
 deriving instance Show ExprA
+
 deriving instance Show
                          (ExprBF
                             ((R "Value" Integer :@ R "Name" String)
@@ -38,6 +39,49 @@ deriving instance Show
                                         ((R "Value" Integer :@ R "Name" String)
                                          :@ Record "Flipped" Expr))))
                             Expr)
+
+deriving instance Show
+                         (ExprBF
+                            ((R "Value" Integer :@ R "Name" String) :@ Record "Flipped" Expr)
+                            (FixF
+                               (FlipBF
+                                  "Test"
+                                  ExprBF
+                                  ((R "Value" Integer :@ R "Name" String)
+                                   :@ Record "Flipped" Expr))))
+
+deriving instance Show
+                         (ExprBF
+                            ((R "Value" Integer :@ R "Name" String)
+                             :@ Record
+                                  "Test"
+                                  (FixF
+                                     (UNFLIPBF
+                                        "Test"
+                                        ExprBF
+                                        ((R "Value" Integer :@ R "Name" String)
+                                         :@ Record "Flipped" Expr))))
+                            (FixF ExprF))
+
+deriving instance Show
+                         (UNFLIPBF
+                            "Test"
+                            ExprBF
+                            ((R "Value" Integer :@ R "Name" String) :@ Record "Flipped" Expr)
+                            (FixF
+                               (UNFLIPBF
+                                  "Test"
+                                  ExprBF
+                                  ((R "Value" Integer :@ R "Name" String)
+                                   :@ Record "Flipped" Expr))))
+
+deriving instance Show
+                         (ExprBF
+                            ((R "Value" Integer :@ R "Name" String) :@ Record "Test" FixType)
+                            (FixF ExprF))
+
+---------------------
+
 
 instance CondBifunctorM ExprBF where
   type FirstPrototype ExprBF = (R "Value" AnyType :@ R "Name" AnyType :@ R "Test" AnyType)
@@ -53,7 +97,7 @@ instance CondBifunctorM ExprBF where
     cast Unit = Unit
 
 test01 :: ExprA
-test01 = AddFixBF $ Scop "test" (AddFixBF Unit)
+test01 = AddFixBF $ Scop "test" Unit
 
 {-
 test02 :: ExprA
@@ -66,7 +110,122 @@ test02 = condBimapP @"Name" (const True) (++"best") id test01
 
 
 
+---------------------------
+
+
+
+deriving instance Show
+                         (ExprBF
+                            ((R "Value" Integer :@ R "Name" String)
+                             :@ Record
+                                  "Test"
+                                  (FixF
+                                     (FlipBF
+                                        "Test"
+                                        ExprBF
+                                        ((R "Value" Integer :@ R "Name" String)
+                                         :@ Record
+                                              "Flipped"
+                                              (FixF
+                                                 (AddFixBF
+                                                    "Test"
+                                                    ExprBF
+                                                    (R "Value" Integer :@ R "Name" String)))))))
+                            (FixF
+                               (ExprBF
+                                  ((R "Value" Integer :@ R "Name" String)
+                                   :@ Record
+                                        "Test"
+                                        (FixF
+                                           (FlipBF
+                                              "Test"
+                                              ExprBF
+                                              ((R "Value" Integer :@ R "Name" String)
+                                               :@ Record
+                                                    "Flipped"
+                                                    (FixF
+                                                       (AddFixBF
+                                                          "Test"
+                                                          ExprBF
+                                                          (R "Value" Integer
+                                                           :@ R "Name" String))))))))))
+
+{-
+deriving instance Show
+                         (ExprBF
+                            ((R "Value" Integer :@ R "Name" String)
+                             :@ Record
+                                  "Test"
+                                  (FixF
+                                     (FlipBF
+                                        "Test"
+                                        ExprBF
+                                        ((R "Value" Integer :@ R "Name" String)
+                                         :@ Record
+                                              "Flipped"
+                                              (FixF
+                                                 (AddFixBF
+                                                    "Test"
+                                                    ExprBF
+                                                    (R "Value" Integer :@ R "Name" String)))))))
+                            (FixF
+                               (ExprBF
+                                  ((R "Value" Integer :@ R "Name" String)
+                                   :@ Record
+                                        "Test"
+                                        (FixF
+                                           (FlipBF
+                                              "Test"
+                                              ExprBF
+                                              ((R "Value" Integer :@ R "Name" String)
+                                               :@ Record
+                                                    "Flipped"
+                                                    (FixF
+                                                       (AddFixBF
+                                                          "Test"
+                                                          ExprBF
+                                                          (R "Value" Integer
+                                                           :@ R "Name" String))))))))))
 
 
 
 
+deriving instance Show
+                         (ExprBF
+                            ((R "Value" Integer :@ R "Name" String)
+                             :@ Record
+                                  "Test"
+                                  (FixF
+                                     (FlipBF
+                                        "Test"
+                                        ExprBF
+                                        ((R "Value" Integer :@ R "Name" String)
+                                         :@ Record
+                                              "Flipped"
+                                              (FixF
+                                                 (AddFixBF
+                                                    "Test"
+                                                    ExprBF
+                                                    (R "Value" Integer :@ R "Name" String)))))))
+                            (FixF
+                               (ExprBF
+                                  ((R "Value" Integer :@ R "Name" String)
+                                   :@ Record
+                                        "Test"
+                                        (FixF
+                                           (FlipBF
+                                              "Test"
+                                              ExprBF
+                                              ((R "Value" Integer :@ R "Name" String)
+                                               :@ Record
+                                                    "Flipped"
+                                                    (FixF
+                                                       (AddFixBF
+                                                          "Test"
+                                                          ExprBF
+                                                          (R "Value" Integer
+                                                           :@ R "Name" String))))))))))
+
+-}
+
+ 

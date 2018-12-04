@@ -94,6 +94,7 @@ type family GetRecordNameByIndex (a :: Nat) b c where
   GetRecordNameByIndex n a b = b
 
 
+{-
 condBimap p f j   a = runIdentity $ condBimapM p (return . f) (return . j)              a
 condCata  p f     a = runIdentity $ condCataM  p (return . f)                           a
 condAna   p f     a = runIdentity $ condAnaM   p (return . f)                           a
@@ -105,6 +106,7 @@ condBimapP
   :: forall s t b a c d  . ( KnownSymbol s, CondBifunctorM t, Fixable b, Fixable a, Fixable c, Fixable d, ToCDD s c, FromCDD s b, TOCDD(t,b,c) )
   => (t b a -> Bool) -> (TypeFromRecord s b -> TypeFromRecord s c) -> (a -> d) -> t b a -> t c d
 condBimapP p f j a = condBimap p (toCDD (Proxy @s) . f . fromCDD (Proxy @s)) j a
+-}
 
 
 
@@ -113,14 +115,22 @@ newtype FixF f = InF ( f (FixF f) )
 instance Show (f (FixF f)) => Show (FixF f) where
   show (InF a) = show a
 
-{-
-type family UnFlipBF a b c d where
-  UnFlipBF a b (c :@ Record "Flipped" e) d = b (c :@ Record a d) e
--}
+data UNFLIPBF (a :: Symbol) (b :: * -> * -> *) c d
 
+type family UnFlipBF a b c d where
+  -- UnFlipBF a b (c :@ Record "Flipped" e) (FixF (UNFLIPBF a b (c :@ Record "Flipped" e))) = b (c :@ Record a FixType ) e
+  -- UnFlipBF a b (c :@ Record "Flipped" e) (FixF (UNFLIPBF f g h)) = b (c :@ Record a (FixF (UNFLIPBF f g h))) e
+  UnFlipBF a b (c :@ Record "Flipped" e) d = b (c :@ Record a d) e
+
+-- data AddFixBF (a :: Symbol) b c d = AddFixBF ( b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))) d )
 
 type family (OutF a) where
-  -- OutF (FixF (FlipBF a b c)) = UnFlipBF a b c (FixF (UnFlipBF a b c))
+  -- OutF (FixF (FlipBF a b c)) = UnFlipBF a b c (FixF (UNFLIPBF a b c))
+  OutF (FixF (AddFixBF a b c)) =
+             b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a b c))))))
+             (FixF (b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" (FixF (AddFixBF a b c))))))))
+
+  OutF (FixF (FlipBF a b c)) = UnFlipBF a b c (FixF (FlipBF a b c))
   OutF (FixF f) = f (FixF f)
   OutF a = a
 
@@ -138,13 +148,16 @@ instance {-# OVERLAPPABLE #-} (OutF q ~ q) => Fixable q where
 
 
 data AnyType
+data FixType = FixType
+  deriving (Show)
 
 type family Match a b where
   Match AnyType a = 'True
   
 
 
-data TypeNotFound
+data TypeNotFound = TypeNotFound
+ deriving (Show)
 newtype a :@ b = CommDisj (Either a b)
 newtype Record (a :: Symbol) b = Record b
 newtype FlippedRecord (a :: Symbol) b = FlippedRecord b
@@ -167,6 +180,7 @@ type family TypeFromRecord (a :: Symbol) b where
 
 
 
+{-
 condParaM :: (CondBifunctorM t,                            Monad m,                            Fixable a, TOCDD(t,a,a))
           => (t a (FixF (t a)) -> Bool)                -> (t a (FixF (t a), b) -> m b)                                 -> FixF (t a)   -> m b
 condParaM     p f     a =                           f =<<  condBimapM p return
@@ -199,6 +213,7 @@ condApoM      p f     a = do
  where
   j (Left  d) = return d
   j (Right d) = condApoM p f d
+-}
 
 
 
