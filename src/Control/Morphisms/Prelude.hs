@@ -29,8 +29,9 @@ class CondBifunctorM t where
 
 --data AddFixBF (a :: Symbol) fix b c d = AddFixBF ( b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))  ) d )
 
-data AddFixBF (a :: Symbol) fix b c d = AddFixBF ( b (c :@ Record a (GetFixType a fix b c d)  ) d )
+-- data AddFixBF (a :: Symbol) fix b c d = AddFixBF ( b (c :@ Record a (GetFixType a fix b c d)  ) d )
 
+{-
 type family GetFixType (a :: Symbol) fix b c d where
   GetFixType a FixType b c d = FixF (FlipBF a b (c :@ Record "Flipped" d))
   GetFixType a other b c d = other
@@ -38,6 +39,7 @@ type family GetFixType (a :: Symbol) fix b c d where
 deriving instance (Show (b (c :@ Record a (GetFixType a fix b c d)) d)
                   )
    => Show (AddFixBF a fix b c d)
+-}
 
 data FlipBF (a :: Symbol) (b :: * -> * -> *) c d = FlipBF ( b c d )
  deriving (Show)
@@ -192,8 +194,8 @@ type family TypeXOR a b where
 type family TypeFromRecord (a :: Symbol) b where
   TypeFromRecord a (Record a b) = b
   TypeFromRecord a (b :@ c) = TypeXOR (TypeFromRecord a b) (TypeFromRecord a c)
-  TypeFromRecord a  b       = TypeNotFound
-  --TypeFromRecord a  b       = (Proxy a,b)
+  --TypeFromRecord a  b       = TypeNotFound
+  TypeFromRecord a  b       = (Proxy a,b)
 
 
 
