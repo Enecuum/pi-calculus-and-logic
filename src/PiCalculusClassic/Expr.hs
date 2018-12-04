@@ -12,7 +12,7 @@ type T a b = TypeFromRecord a b
 
 type Expr = FixF ExprF
 type ExprA = ExprF Expr
-type ExprF = ExprBF (R "Value" Integer :@ R "Name" String)
+type ExprF = AddFixBF "Test" ExprBF (R "Value" Integer :@ R "Name" String)
 
 data ExprBF a b
    = Unit
@@ -26,9 +26,21 @@ data ExprBF a b
 
 deriving instance Show Expr
 deriving instance Show ExprA
+deriving instance Show
+                         (ExprBF
+                            ((R "Value" Integer :@ R "Name" String)
+                             :@ Record
+                                  "Test"
+                                  (FixF
+                                     (FlipBF
+                                        "Test"
+                                        ExprBF
+                                        ((R "Value" Integer :@ R "Name" String)
+                                         :@ Record "Flipped" Expr))))
+                            Expr)
 
 instance CondBifunctorM ExprBF where
-  type FirstPrototype ExprBF = (R "Value" AnyType :@ R "Name" AnyType)
+  type FirstPrototype ExprBF = (R "Value" AnyType :@ R "Name" AnyType :@ R "Test" AnyType)
   condBimapM p f j o@(Value a)    | p o = do b <- f (to @"Value" a);                                        return $ Value (fr @"Value" b)
   condBimapM p f j o@(Send a b c) | p o = do d <- f (to @"Name"  a); e <- f (to @"Name" b); g <- j (inF c); return $ Send  (fr @"Name"  d) (fr @"Name" e) (outF g)
   condBimapM p f j o@(Recv a b c) | p o = do d <- f (to @"Name"  a); e <- f (to @"Name" b); g <- j (inF c); return $ Recv  (fr @"Name"  d) (fr @"Name" e) (outF g)
@@ -41,10 +53,12 @@ instance CondBifunctorM ExprBF where
     cast Unit = Unit
 
 test01 :: ExprA
-test01 = Scop "test" Unit
+test01 = AddFixBF $ Scop "test" (AddFixBF Unit)
 
+{-
 test02 :: ExprA
 test02 = condBimapP @"Name" (const True) (++"best") id test01
+-}
 
 
 

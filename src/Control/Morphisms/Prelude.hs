@@ -25,8 +25,25 @@ class CondBifunctorM t where
   condBimapM :: ( Monad m, Fixable a, Fixable b, Fixable c, Fixable d, TOCDD(t,a,c) )
              => (t a b -> Bool) -> (a -> m c) -> (b -> m d) -> t a b -> m (t c d)
 
+data AddFixBF (a :: Symbol) b c d = AddFixBF ( b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))) d )
+
+deriving instance (Show (b (c :@ Record a (FixF (FlipBF a b (c :@ Record "Flipped" d)))) d)
+                  )
+   => Show (AddFixBF a b c d)
+
+data FlipBF (a :: Symbol) (b :: * -> * -> *) c d = FlipBF ( b c d )
+ deriving (Show)
+
+{-
+type family AddFixBF (a :: Symbol) b c where
+  AddFixBF a (t b) c = t (b :@ Record a (FixF (FlipBF a t (b :@ Record (AppendSymbol a "Flipped") c) ))) c
+-}
+
 to :: forall a c . ToCDD a c => TypeFromRecord a c -> c
 to = toCDD (Proxy @a)
+
+fr :: forall a b . FromCDD a b => b -> TypeFromRecord a b
+fr = fromCDD (Proxy @a)
 
 class ToCDD (a :: Symbol) c where
   toCDD :: Proxy a -> TypeFromRecord a c -> c
@@ -46,9 +63,6 @@ instance (ToCDD a d, TypeFromRecord a c ~ TypeNotFound) => ToCDD a (c :@ d) wher
 
 instance ToCDD "NotFound" a
 
-
-fr :: forall a b . FromCDD a b => b -> TypeFromRecord a b
-fr = fromCDD (Proxy @a)
 
 class FromCDD (a :: Symbol) b where
   fromCDD :: Proxy a -> b -> TypeFromRecord a b
@@ -99,7 +113,14 @@ newtype FixF f = InF ( f (FixF f) )
 instance Show (f (FixF f)) => Show (FixF f) where
   show (InF a) = show a
 
+{-
+type family UnFlipBF a b c d where
+  UnFlipBF a b (c :@ Record "Flipped" e) d = b (c :@ Record a d) e
+-}
+
+
 type family (OutF a) where
+  -- OutF (FixF (FlipBF a b c)) = UnFlipBF a b c (FixF (UnFlipBF a b c))
   OutF (FixF f) = f (FixF f)
   OutF a = a
 
@@ -126,6 +147,7 @@ type family Match a b where
 data TypeNotFound
 newtype a :@ b = CommDisj (Either a b)
 newtype Record (a :: Symbol) b = Record b
+newtype FlippedRecord (a :: Symbol) b = FlippedRecord b
 
 fromCDL :: a :@ b -> a
 fromCDL = undefined
