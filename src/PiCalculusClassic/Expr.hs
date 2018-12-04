@@ -99,10 +99,8 @@ instance CondBifunctorM ExprBF where
 test01 :: ExprA
 test01 = AddFixBF $ Scop "test" Unit
 
-{-
 test02 :: ExprA
 test02 = condBimapP @"Name" (const True) (++"best") id test01
--}
 
 
 

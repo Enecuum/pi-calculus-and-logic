@@ -94,19 +94,19 @@ type family GetRecordNameByIndex (a :: Nat) b c where
   GetRecordNameByIndex n a b = b
 
 
-{-
 condBimap p f j   a = runIdentity $ condBimapM p (return . f) (return . j)              a
+{-
 condCata  p f     a = runIdentity $ condCataM  p (return . f)                           a
 condAna   p f     a = runIdentity $ condAnaM   p (return . f)                           a
 condHylo  p f e g a = runIdentity $ condHyloM  p (return . f) (return . e) (return . g) a
 condPara  p f     a = runIdentity $ condParaM  p (return . f)                           a
 condApo   p f     a = runIdentity $ condApoM   p (return . f)                           a
+-}
 
 condBimapP
   :: forall s t b a c d  . ( KnownSymbol s, CondBifunctorM t, Fixable b, Fixable a, Fixable c, Fixable d, ToCDD s c, FromCDD s b, TOCDD(t,b,c) )
   => (t b a -> Bool) -> (TypeFromRecord s b -> TypeFromRecord s c) -> (a -> d) -> t b a -> t c d
 condBimapP p f j a = condBimap p (toCDD (Proxy @s) . f . fromCDD (Proxy @s)) j a
--}
 
 
 
