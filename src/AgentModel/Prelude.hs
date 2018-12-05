@@ -19,16 +19,26 @@ preludeDecls =
  [Left  $ Agent { agentId = "Integer", ports = ["Type"], value = Symbol "Type/Integer" }
  ,Left  $ Agent { agentId = "Channel", ports = ["Type"], value = Symbol "Type/PiCalculusChannel" }
 
+ ,Left  $ Agent { agentId = "BinaryOperator", ports = ["Arg1","Arg2","Result"], value = Symbol "Class/BinaryOperator" }
+ ,Left  $ Agent { agentId = "B9wSQMV5", ports = ["Type"], value = Symbol "TypeIndeterminant" }
+ ,Left  $ Agent { agentId = "7BihLgw3", ports = ["Type"], value = Symbol "TypeIndeterminant" }
+ ,Left  $ Agent { agentId = "PeNcuHcB", ports = ["Type"], value = Symbol "TypeIndeterminant" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "B9wSQMV5" "Type", toPort = Port "BinaryOperator" "Arg1/Type/In" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "7BihLgw3" "Type", toPort = Port "BinaryOperator" "Arg2/Type/In" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "PeNcuHcB" "Type", toPort = Port "BinaryOperator" "Result/Type/Out" }
+
  ,Left  $ Agent { agentId = "ClosureOperator", ports = ["Arg1","Arg2","Result"], value = Symbol "Class/ClosureOperator" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "BinaryOperator" "Class", toPort = Port "ClosureOperator" "SuperClass" }
  ,Left  $ Agent { agentId = "dEZThAuo", ports = ["Type"], value = Symbol "TypeIndeterminant" }
- ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "dEZThAuo" "Type", toPort = Port "ClosureOperator" "Arg1/TypeIn" }
- ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "dEZThAuo" "Type", toPort = Port "ClosureOperator" "Arg2/TypeIn" }
- ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "dEZThAuo" "Type", toPort = Port "ClosureOperator" "Result/TypeOut" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "dEZThAuo" "Type", toPort = Port "ClosureOperator" "Arg1/Type/In" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "dEZThAuo" "Type", toPort = Port "ClosureOperator" "Arg2/Type/In" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "dEZThAuo" "Type", toPort = Port "ClosureOperator" "Result/Type/Out" }
 
  ,Left  $ Agent { agentId = "CommutativeOperator", ports = ["Arg1","Arg2","Result"], value = Symbol "Class/CommutativeOperator" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "BinaryOperator" "Class", toPort = Port "CommutativeOperator" "SuperClass" }
  ,Left  $ Agent { agentId = "2rBFz4sY", ports = ["Type"], value = Symbol "TypeIndeterminant" }
- ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "2rBFz4sY" "Type", toPort = Port "CommutativeOperator" "Arg1/TypeIn" }
- ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "2rBFz4sY" "Type", toPort = Port "CommutativeOperator" "Arg2/TypeIn" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "2rBFz4sY" "Type", toPort = Port "CommutativeOperator" "Arg1/Type/In" }
+ ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "2rBFz4sY" "Type", toPort = Port "CommutativeOperator" "Arg2/Type/In" }
  ,Left  $ Agent { agentId = "6f58GwLo", ports = ["Arg1","Arg2","Result"], value = Symbol "ClassIndeterminant" }
  ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "CommutativeOperator" "Class", toPort = Port "6f58GwLo" "SuperClass" }
  ,Right $ Edge  { params  = Multi [Directed,SharedUse], fromPort = Port "CbapTR4n" "Sort", toPort = Port "6f58GwLo" "Arg1/Sort/In" }
