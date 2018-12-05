@@ -1,24 +1,24 @@
-{-# LANGUAGE FlexibleInstances, DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleInstances, DuplicateRecordFields, FlexibleContexts #-}
 
 module AgentModel.Core where
 
 import System.IO.Unsafe
 import System.Random
 import Data.Default.Class
+import Data.List
+import AgentModel.Types
+import AgentModel.Prelude
 
-instance Show EdgeParams where
-  show Directed = "D"
-  show UniqueSingle = "U"
-  show SharedUse = "S"
-  show (Multi a) = concatMap show a
-
-data EdgeParams = Directed | UniqueSingle | SharedUse | Multi [EdgeParams]
-data Value      = Integer Integer | Symbol String     | Path  [Value]          deriving (Show)
-
-data Edge  = Edge  { params  :: EdgeParams, fromPort :: Port, toPort :: Port } deriving (Show)
-data Agent = Agent { agentId :: String,  ports :: [String], value :: Value }   deriving (Show)
-data Port  = Port  { agentId :: String,  port  ::  String }                    deriving (Eq)
-data Net   = Net   { agents  :: [Agent], edges :: [Edge]  }                    deriving (Show)
+mergeNet :: Net -> Net -> Net
+mergeNet (Net a b) (Net c d) | assert1 && assert2 = Net e f
+                             | otherwise = error "invalid net"
+ where
+  byA = nubBy (\(Agent a _ _) (Agent b _ _) -> a == b)
+  byE = nubBy (\(Edge _ a b) (Edge _ c d) -> (a,b) == (c,d))
+  e = nub $ a++c
+  f = nub $ b++d
+  assert1 = length e == length (byA e)
+  assert2 = length f == length (byE f)
 
 
 partialEval :: (Port,Net) -> IO (Port,Net)
@@ -117,17 +117,6 @@ randomStringId = do
 n :: Integer -> (Port,Net)
 n = fromInteger
 
-instance {-# OVERLAPPING #-} Show (Port,Net) where
-  show (p,n) = "========\n" ++ show p ++ "\n" ++ show n ++ "\n========\n"
-
-instance {-# OVERLAPPING #-} Show [Agent] where
-  show a = unlines $ "" : map (("    "++).show) a
-
-instance {-# OVERLAPPING #-} Show [Edge] where
-  show a = unlines $ "" : map (("    "++).show) a
-
-instance Show Port where
-  show (Port a b) = a ++ ":" ++ b
 
 instance Num (Port,Net) where
   (a,Net b c) + (d,Net e f) = unsafePerformIO $ integerAdd a d (Net (b++e) (c++f))
@@ -135,14 +124,10 @@ instance Num (Port,Net) where
   fromInteger n = unsafePerformIO $ do
     o@(Agent a [b] c) <- createIntegerAgent n
     let g = dEdge { params = Multi [Directed,SharedUse], fromPort = Port "Integer" "Type", toPort = Port a (b ++ "TypeIn") }
-    return (Port a b, Net [o] [g])
+    return (Port a b, Net [o] [g] `mergeNet` def)
 
 
 
-
-dPort  = Port undefined undefined
-dEdge  = Edge (Multi [Directed,UniqueSingle]) undefined undefined
-dAgent = Agent undefined [] (Symbol "DefaultAgent")
 
 
 
