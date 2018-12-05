@@ -119,8 +119,8 @@ n = fromInteger
 
 
 instance Num (Port,Net) where
-  (a,Net b c) + (d,Net e f) = unsafePerformIO $ integerAdd a d (Net (b++e) (c++f))
-  (a,Net b c) * (d,Net e f) = unsafePerformIO $ integerMul a d (Net (b++e) (c++f))
+  (a,b) + (d,e) = unsafePerformIO $ integerAdd a d $ mergeNet b e
+  (a,b) * (d,e) = unsafePerformIO $ integerMul a d $ mergeNet b e
   fromInteger n = unsafePerformIO $ do
     o@(Agent a [b] c) <- createIntegerAgent n
     let g = dEdge { params = Multi [Directed,SharedUse], fromPort = Port "Integer" "Type", toPort = Port a (b ++ "TypeIn") }
