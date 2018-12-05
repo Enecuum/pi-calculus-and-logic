@@ -1,7 +1,9 @@
+{-# LANGUAGE FlexibleInstances, DuplicateRecordFields #-}
 
 module AgentModel.Prelude where
 
 import AgentModel.Core
+import Data.Default.Class
 
 prelude :: Net
 prelude = Net agents edges
@@ -12,11 +14,17 @@ prelude = Net agents edges
    , dAgent { agentId = "IntegerIn",  ports = ["Arg1","Require"], value = Symbol "InputTypeFunction"  }
    ]
   edges  =
-   [ dEdge { polyedge = SharedUse, directed = True
-           , fromPort = dPort { idOfAgent = "Integer",    port = "Type" }
-           , toPort   = dPort { idOfAgent = "IntegerOut", port = "Arg1" } }
-   , dEdge { polyedge = SharedUse, directed = True
-           , fromPort = dPort { idOfAgent = "IntegerIn",  port = "Arg1" }
-           , toPort   = dPort { idOfAgent = "Integer",    port = "Type" } }
+   [ dEdge { params = Multi [Directed,SharedUse]
+           , fromPort = dPort { agentId = "Integer",    port = "Type" }
+           , toPort   = dPort { agentId = "IntegerOut", port = "Arg1" } }
+   , dEdge { params = Multi [Directed,SharedUse]
+           , fromPort = dPort { agentId = "IntegerIn",  port = "Arg1" }
+           , toPort   = dPort { agentId = "Integer",    port = "Type" } }
    ]
+
+instance Default Net where
+  def = prelude
+  
+
+
 
