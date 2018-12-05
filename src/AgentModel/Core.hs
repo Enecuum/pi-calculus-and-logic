@@ -1,14 +1,18 @@
 {-# LANGUAGE FlexibleInstances #-}
 
+module AgentModel.Core where
+
 import System.IO.Unsafe
 import System.Random
 
+data Polyedge = UniqueSingle | SharedUse deriving (Show)
 
 data Value = Integer Integer | Symbol String | Path [Value] deriving (Show)
-data Agent = Agent { agentId :: String, ports :: [String], value :: Value, typeOfAgent :: Maybe (Maybe Port,[Port]) } deriving (Show)
+data Agent = Agent { agentId :: String, ports :: [String], value :: Value, typeOfAgent :: Maybe [Port] } deriving (Show)
 data Port  = Port { idOfAgent :: String, port :: String, typeOfPort :: Maybe Port } deriving (Show,Eq)
-data Edge  = Edge { directed :: Bool, fromPort :: Port, toPort :: Port, typeOfEdge :: Maybe Port } deriving (Show)
+data Edge  = Edge { polyedge :: Polyedge, directed :: Bool, fromPort :: Port, toPort :: Port, typeOfEdge :: Maybe Port } deriving (Show)
 data Net   = Net { agents :: [Agent], edges :: [Edge] } deriving (Show)
+
 
 
 partialEval :: (Port,Net) -> IO (Port,Net)
@@ -23,7 +27,7 @@ followPort (p@(Port a b q), Net c d) = case (f,e) of
   f = filter (\x -> agentId x == a && b `elem` ports x) c
 
 setEdge :: Edge -> Net -> Net
-setEdge o@(Edge a b c d) (Net e f) = Net e (o:h)
+setEdge o@(Edge q a b c d) (Net e f) = Net e (o:h)
  where
   pred x = fromPort x == b && toPort x == c
   h = filter (not.pred) f
@@ -46,12 +50,12 @@ instance TypeInference Edge where
 
 createIntegerAgent :: Integer -> IO Agent
 createIntegerAgent n = do
-  a <- randomAgentId
-  return $ dAgent { agentId = a, ports = ["Result"], value = Integer n }
+  a <- randomStringId
+  return $ dAgent { agentId = a, ports = ["Result"], value = Integer n, typeOfAgent = Just [dPort { idOfAgent = "IntegerOut", port = "Result" }] }
 
 integerAdd :: Port -> Port -> Net -> IO (Port,Net)
 integerAdd a b (Net agents edges) = do
-  d <- randomAgentId
+  d <- randomStringId
   let e = dAgent { agentId = d, ports = ["Arg1","Arg2","Result"], value = Symbol "IntegerAdd" }
   let f = dEdge { directed = True, fromPort = a, toPort = dPort { idOfAgent = d, port = "Arg1" } }
   let g = dEdge { directed = True, fromPort = b, toPort = dPort { idOfAgent = d, port = "Arg2" } }
@@ -60,7 +64,7 @@ integerAdd a b (Net agents edges) = do
 
 integerMul :: Port -> Port -> Net -> IO (Port,Net)
 integerMul a b (Net agents edges) = do
-  d <- randomAgentId
+  d <- randomStringId
   let e = dAgent { agentId = d, ports = ["Arg1","Arg2","Result"], value = Symbol "IntegerMul" }
   let f = dEdge { directed = True, fromPort = a, toPort = dPort { idOfAgent = d, port = "Arg1" } }
   let g = dEdge { directed = True, fromPort = b, toPort = dPort { idOfAgent = d, port = "Arg2" } }
@@ -69,7 +73,7 @@ integerMul a b (Net agents edges) = do
 
 piCalculusSend :: Port -> Port -> Port -> Net -> IO (Port,Net)
 piCalculusSend a b c (Net agents edges) = do
-  d <- randomAgentId
+  d <- randomStringId
   let e = dAgent { agentId = d, ports = ["ChanToPipe","NameToSend","SubseqProcess","Result"], value = Symbol "PiCalculusSend" }
   let f = dEdge { directed = True, fromPort = dPort { idOfAgent = d, port = "ChanToPipe" }, toPort = a }
   let g = dEdge { directed = True, fromPort = b, toPort = dPort { idOfAgent = d, port = "NameToSend" } }
@@ -79,7 +83,7 @@ piCalculusSend a b c (Net agents edges) = do
 
 lambdaAbst :: Port -> Port -> Net -> IO (Port,Net)
 lambdaAbst a b (Net agents edges) = do
-  d <- randomAgentId
+  d <- randomStringId
   let e = dAgent { agentId = d, ports = ["Bind","Expr","Result"], value = Symbol "LambdaAbst" }
   let f = dEdge { directed = True, fromPort = dPort { idOfAgent = d, port = "Bind" }, toPort = a }
   let g = dEdge { directed = True, fromPort = b, toPort = dPort { idOfAgent = d, port = "Expr" } }
@@ -88,7 +92,7 @@ lambdaAbst a b (Net agents edges) = do
 
 lambdaApply :: Port -> Port -> Net -> IO (Port,Net)
 lambdaApply a b (Net agents edges) = do
-  d <- randomAgentId
+  d <- randomStringId
   let e = dAgent { agentId = d, ports = ["Argument","Function","Result"], value = Symbol "LambdaApply" }
   let f = dEdge { directed = True, fromPort = a, toPort = dPort { idOfAgent = d, port = "Argument" } }
   let g = dEdge { directed = True, fromPort = b, toPort = dPort { idOfAgent = d, port = "Function" } }
@@ -96,7 +100,7 @@ lambdaApply a b (Net agents edges) = do
   return (h,Net (e : agents) (f : g : edges))
 
 
-randomAgentId = do
+randomStringId = do
   a <- randomRIO (2^46,2^48 :: Integer)
   return $ take 8 $ f a
  where
@@ -120,13 +124,13 @@ instance Num (Port,Net) where
   (a,Net b c) + (d,Net e f) = unsafePerformIO $ integerAdd a d (Net (b++e) (c++f))
   (a,Net b c) * (d,Net e f) = unsafePerformIO $ integerMul a d (Net (b++e) (c++f))
   fromInteger n = unsafePerformIO $ do
-    o@(Agent a [b] c Nothing) <- createIntegerAgent n
+    o@(Agent a [b] c _) <- createIntegerAgent n
     return (Port a b Nothing, Net [o] [])
 
 
 
 dPort  = Port undefined undefined Nothing
-dEdge  = Edge undefined undefined undefined Nothing
+dEdge  = Edge UniqueSingle True undefined undefined Nothing
 dAgent = Agent undefined [] (Symbol "DefaultAgent") Nothing
 
 
