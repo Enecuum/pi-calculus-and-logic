@@ -37,6 +37,35 @@ preludeDecls =
  ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Arg2/Type/In"                    }
  ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Result/Type/Out"                 }
 
+ ,Left  $ agent {  agentId =      "AssociativeOperator",          value = Symbol                     "Class"                                   }
+ ,Right $ edge1 { fromPort = Port     "ClosureOperator" "Class", toPort = Port         "AssociativeOperator" "SuperClass"                      }
+ ,Left  $ agent {  agentId =                 "s4CC2jGS",          value = Symbol "ClassIndeterminant/ForAll"                                   }
+ ,Right $ edge1 { fromPort = Port "AssociativeOperator" "Class", toPort = Port                    "s4CC2jGS" "SuperClass"                      }
+ ,Right $ edge1 { fromPort = Port            "phLkEMue" "Sort",  toPort = Port                    "s4CC2jGS" "Arg1/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "QUzGSXMc" "Sort",  toPort = Port                    "s4CC2jGS" "Arg2/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "8ZveTeZk" "Sort",  toPort = Port                    "s4CC2jGS" "Result/Sort"                     }
+ ,Left  $ agent {  agentId =                 "PV3PA3Jg",          value = Symbol "ClassIndeterminant/ForAll"                                   }
+ ,Right $ edge1 { fromPort = Port "AssociativeOperator" "Class", toPort = Port                    "PV4PA3Jg" "SuperClass"                      }
+ ,Right $ edge1 { fromPort = Port            "8ZveTeZk" "Sort",  toPort = Port                    "PV4PA3Jg" "Arg1/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "Px2WMRMG" "Sort",  toPort = Port                    "PV4PA3Jg" "Arg2/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "kYcuEnPV" "Sort",  toPort = Port                    "PV4PA3Jg" "Result/Sort"                     }
+ ,Left  $ agent {  agentId =                 "ZKmQEYbF",          value = Symbol "ClassIndeterminant/ForAll"                                   }
+ ,Right $ edge1 { fromPort = Port "AssociativeOperator" "Class", toPort = Port                    "ZKmQEYbF" "SuperClass"                      }
+ ,Right $ edge1 { fromPort = Port            "phLkEMue" "Sort",  toPort = Port                    "ZKmQEYbF" "Arg1/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "X9Wffq8K" "Sort",  toPort = Port                    "ZKmQEYbF" "Arg2/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "kYcuEnPV" "Sort",  toPort = Port                    "ZKmQEYbF" "Result/Sort"                     }
+ ,Left  $ agent {  agentId =                 "Z9WH82Cy",          value = Symbol "ClassIndeterminant/ForAll"                                   }
+ ,Right $ edge1 { fromPort = Port "AssociativeOperator" "Class", toPort = Port                    "Z9WH82Cy" "SuperClass"                      }
+ ,Right $ edge1 { fromPort = Port            "QUzGSXMc" "Sort",  toPort = Port                    "Z9WH82Cy" "Arg1/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "Px2WMRMG" "Sort",  toPort = Port                    "Z9WH82Cy" "Arg2/Sort"                       }
+ ,Right $ edge1 { fromPort = Port            "X9Wffq8K" "Sort",  toPort = Port                    "Z9WH82Cy" "Result/Sort"                     }
+ ,Left  $ agent {  agentId =                 "phLkEMue",          value = Symbol  "SortIndeterminant/ForAll"                                   }
+ ,Left  $ agent {  agentId =                 "QUzGSXMc",          value = Symbol  "SortIndeterminant/ForAll"                                   }
+ ,Left  $ agent {  agentId =                 "8ZveTeZk",          value = Symbol  "SortIndeterminant/ForAll"                                   }
+ ,Left  $ agent {  agentId =                 "Px2WMRMG",          value = Symbol  "SortIndeterminant/ForAll"                                   }
+ ,Left  $ agent {  agentId =                 "kYcuEnPV",          value = Symbol  "SortIndeterminant/ForAll"                                   }
+ ,Left  $ agent {  agentId =                 "X9Wffq8K",          value = Symbol  "SortIndeterminant/ForAll"                                   }
+
  ,Left  $ agent {  agentId =      "CommutativeOperator",          value = Symbol "Class/CommutativeOperator"                                   }
  ,Right $ edge1 { fromPort = Port      "BinaryOperator" "Class", toPort = Port         "CommutativeOperator" "SuperClass"                      }
  ,Left  $ agent {  agentId =                 "2rBFz4sY",          value = Symbol  "TypeIndeterminant/ForAll"                                   }
