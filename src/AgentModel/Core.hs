@@ -75,8 +75,9 @@ integerMul a b (Net agents edges) = do
   let e = dAgent { agentId = d, ports = ["Arg1","Arg2","Result"], value = Symbol "IntegerMul" }
   let f = dEdge { fromPort = a, toPort = dPort { agentId = d, port = "Arg1" } }
   let g = dEdge { fromPort = b, toPort = dPort { agentId = d, port = "Arg2" } }
+  let k = dEdge { fromPort = Port "Function/IntegerMul" "Prototype", toPort = Port d "Inherit" }
   let h = dPort { agentId = d, port = "Result" }
-  return (h,Net (e : agents) (f : g : edges))
+  return (h,Net (e : agents) (f : g : k : edges))
 
 piCalculusSend :: Port -> Port -> Port -> Net -> IO (Port,Net)
 piCalculusSend a b c (Net agents edges) = do
