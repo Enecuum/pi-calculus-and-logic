@@ -19,23 +19,27 @@ agent = Agent undefined [] undefined
 
 preludeDecls :: [Either Agent Edge]
 preludeDecls =
- [Left  $ agent { agentId = "Integer", ports = ["Type"], value = Symbol "Type/Integer" }
- ,Left  $ agent { agentId = "Channel", ports = ["Type"], value = Symbol "Type/PiCalculusChannel" }
+ [Left  $ agent { agentId =                   "Type/Integer",          value = Symbol                        "Type", ports = ["Type"] }
+ ,Left  $ agent { agentId =                   "Type/Channel",          value = Symbol                        "Type", ports = ["Type"] }
 
- ,Left  $ agent {  agentId =           "BinaryOperator",          value = Symbol      "Class/BinaryOperator", ports = ["Arg1","Arg2","Result"] }
- ,Left  $ agent {  agentId =                 "B9wSQMV5",          value = Symbol  "TypeIndeterminant/ForAll"                            }
- ,Left  $ agent {  agentId =                 "7BihLgw3",          value = Symbol  "TypeIndeterminant/ForAll"                                   }
- ,Left  $ agent {  agentId =                 "PeNcuHcB",          value = Symbol  "TypeIndeterminant/ForAll"                                   }
- ,Right $ edge1 { fromPort = Port            "B9wSQMV5" "Type",  toPort = Port              "BinaryOperator" "Arg1/Type/In"                    }
- ,Right $ edge1 { fromPort = Port            "7BihLgw3" "Type",  toPort = Port              "BinaryOperator" "Arg2/Type/In"                    }
- ,Right $ edge1 { fromPort = Port            "PeNcuHcB" "Type",  toPort = Port              "BinaryOperator" "Result/Type/Out"                 }
+ ,Left  $ agent {  agentId =           "Function/IntegerAdd",          value = Symbol                    "Function"                                   }
+ ,Right $ edge1 { fromPort = Port          "ClosureOperator" "Class", toPort = Port                    "IntegerAdd" "Instance"                        }
+ ,Right $ edge1 { fromPort = Port                  "Integer" "Type",  toPort = Port                    "IntegerAdd" "Arg1/Type"                       }
 
- ,Left  $ agent {  agentId =          "ClosureOperator",          value = Symbol     "Class/ClosureOperator"                                   }
+ ,Left  $ agent {  agentId = "Class/Function/BinaryOperator",          value = Symbol                       "Class", ports = ["Arg1","Arg2","Result"] }
+ ,Left  $ agent {  agentId =                      "B9wSQMV5",          value = Symbol            "TypeIndet/ForAll"                                   }
+ ,Left  $ agent {  agentId =                      "7BihLgw3",          value = Symbol            "TypeIndet/ForAll"                                   }
+ ,Left  $ agent {  agentId =                      "PeNcuHcB",          value = Symbol            "TypeIndet/ForAll"                                   }
+ ,Right $ edge1 { fromPort = Port                 "B9wSQMV5" "Type",  toPort = Port "Class/Function/BinaryOperator" "Arg1/Type/In"                    }
+ ,Right $ edge1 { fromPort = Port                 "7BihLgw3" "Type",  toPort = Port "Class/Function/BinaryOperator" "Arg2/Type/In"                    }
+ ,Right $ edge1 { fromPort = Port                 "PeNcuHcB" "Type",  toPort = Port "Class/Function/BinaryOperator" "Result/Type/Out"                 }
+
+ ,Left  $ agent {  agentId =          "ClosureOperator",          value = Symbol                     "Class"                                   }
  ,Right $ edge1 { fromPort = Port      "BinaryOperator" "Class", toPort = Port             "ClosureOperator" "SuperClass"                      }
- ,Left  $ agent {  agentId =                 "dEZThAuo",          value = Symbol  "TypeIndeterminant/ForAll"                                   }
- ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Arg1/Type/In"                    }
- ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Arg2/Type/In"                    }
- ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Result/Type/Out"                 }
+ ,Left  $ agent {  agentId =                 "dEZThAuo",          value = Symbol          "TypeIndet/ForAll"                                   }
+ ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Arg1/Type"                       }
+ ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Arg2/Type"                       }
+ ,Right $ edge1 { fromPort = Port            "dEZThAuo" "Type",  toPort = Port             "ClosureOperator" "Result/Type"                     }
 
  ,Left  $ agent {  agentId =      "AssociativeOperator",          value = Symbol                     "Class"                                   }
  ,Right $ edge1 { fromPort = Port     "ClosureOperator" "Class", toPort = Port         "AssociativeOperator" "SuperClass"                      }
