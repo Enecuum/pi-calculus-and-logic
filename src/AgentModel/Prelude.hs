@@ -19,8 +19,8 @@ agent = Agent undefined [] undefined
 
 preludeDecls :: [Either Agent Edge]
 preludeDecls =
- [Left  $ agent { agentId =                   "Type/Integer",          value = Symbol                        "Type", ports = ["Type"] }
- ,Left  $ agent { agentId =                   "Type/Channel",          value = Symbol                        "Type", ports = ["Type"] }
+ [Left  $ agent { agentId =                   "Type/Integer",          value = Symbol                        "Type", ports = ["Type"]                 }
+ ,Left  $ agent { agentId =                   "Type/Channel",          value = Symbol                        "Type", ports = ["Type"]                 }
 
  ,Left  $ agent {  agentId =           "Function/IntegerAdd",          value = Symbol                    "Function"                                   }
  ,Right $ edge1 { fromPort = Port          "ClosureOperator" "Class", toPort = Port                    "IntegerAdd" "Instance"                        }

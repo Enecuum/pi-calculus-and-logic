@@ -62,11 +62,12 @@ createIntegerAgent n = do
 integerAdd :: Port -> Port -> Net -> IO (Port,Net)
 integerAdd a b (Net agents edges) = do
   d <- randomStringId
-  let e = dAgent { agentId = d, ports = ["Arg1","Arg2","Result"], value = Symbol "IntegerAdd" }
+  let e = dAgent { agentId = d, value = Symbol "Function" }
   let f = dEdge { fromPort = a, toPort = dPort { agentId = d, port = "Arg1" } }
   let g = dEdge { fromPort = b, toPort = dPort { agentId = d, port = "Arg2" } }
+  let k = dEdge { fromPort = Port "Function/IntegerAdd" "Prototype", toPort = Port d "Inherit" }
   let h = dPort { agentId = d, port = "Result" }
-  return (h,Net (e : agents) (f : g : edges))
+  return (h,Net (e : agents) (f : g : k : edges))
 
 integerMul :: Port -> Port -> Net -> IO (Port,Net)
 integerMul a b (Net agents edges) = do
