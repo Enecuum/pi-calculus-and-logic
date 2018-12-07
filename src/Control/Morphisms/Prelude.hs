@@ -194,8 +194,8 @@ type family TypeXOR a b where
 type family TypeFromRecord (a :: Symbol) b where
   TypeFromRecord a (Record a b) = b
   TypeFromRecord a (b :@ c) = TypeXOR (TypeFromRecord a b) (TypeFromRecord a c)
-  --TypeFromRecord a  b       = TypeNotFound
-  TypeFromRecord a  b       = (Proxy a,b)
+  TypeFromRecord a  b       = TypeNotFound
+  -- TypeFromRecord a  b       = (Proxy a,b)
 
 
 
