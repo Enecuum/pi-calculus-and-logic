@@ -57,7 +57,7 @@ test02 :: ExprA
 test02 = condBimapP @"Name" (const True) (++"best") id test01
 --test02 = condBimap (const True) id id test01
 
-
+-
 
 
 
